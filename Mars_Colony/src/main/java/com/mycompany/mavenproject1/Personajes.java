@@ -18,13 +18,12 @@ public abstract class Personajes extends Thread  {
     //Atributos clase personaje
     
     public Personajes(int vidaInicial, int costo,
-        String nombre, String equipo, int nivel) {
+        String nombre, int nivel) {
 
         this.vidaInicial = vidaInicial;
         this.vidaActual = vidaInicial;
         this.costo = costo;
         this.nombre = nombre;
-        this.equipo = equipo;
         this.nivel = nivel;
                           }
     
@@ -39,5 +38,8 @@ public abstract class Personajes extends Thread  {
     }
 
     public abstract void mejorar(double porcentajeVida, double porcentajeDaño);
+    
+    
+    
 }     
 

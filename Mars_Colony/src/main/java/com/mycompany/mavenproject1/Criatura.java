@@ -9,9 +9,11 @@ package com.mycompany.mavenproject1;
  * @author dylnr
  */
 public class Criatura extends Personajes implements IAtacante, IMovibles {
+    
+    static final String EQUIPO = "Atacantes";
 
-    public Criatura(int vidaInicial, int costo, String nombre, String equipo, int nivel) {
-        super(vidaInicial, costo, nombre, equipo, nivel);
+    public Criatura(int vidaInicial, int costo, String nombre, int nivel) {
+        super(vidaInicial, costo, nombre, nivel);
     }
 
     @Override

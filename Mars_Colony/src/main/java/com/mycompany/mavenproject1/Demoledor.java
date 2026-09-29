@@ -10,8 +10,8 @@ package com.mycompany.mavenproject1;
  */
 public class Demoledor extends Criatura {
     
-    public Demoledor(int vidaInicial, int costo, String nombre, String equipo, int nivel) {
-        super(vidaInicial, costo, nombre, equipo, nivel);
+    public Demoledor(int vidaInicial, int costo, String nombre,  int nivel) {
+        super(vidaInicial, costo, nombre, nivel);
     }
     
 }
