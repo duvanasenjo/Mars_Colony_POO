@@ -10,8 +10,8 @@ package com.mycompany.mavenproject1;
  */
 public class Ataque_multiple extends Defensa {
     
-    public Ataque_multiple(int vidaInicial, int costo, String nombre, String equipo, int nivel) {
-        super(vidaInicial, costo, nombre, equipo, nivel);
+    public Ataque_multiple(int vidaInicial, int costo, String nombre, int nivel) {
+        super(vidaInicial, costo, nombre, nivel);
     }
     
 }

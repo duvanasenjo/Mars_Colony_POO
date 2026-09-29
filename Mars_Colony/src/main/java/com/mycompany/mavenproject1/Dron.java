@@ -10,8 +10,8 @@ package com.mycompany.mavenproject1;
  */
 public class Dron extends Defensa {
     
-    public Dron(int vidaInicial, int costo, String nombre, String equipo, int nivel) {
-        super(vidaInicial, costo, nombre, equipo, nivel);
+    public Dron(int vidaInicial, int costo, String nombre, int nivel) {
+        super(vidaInicial, costo, nombre, nivel);
     }
     
 }
