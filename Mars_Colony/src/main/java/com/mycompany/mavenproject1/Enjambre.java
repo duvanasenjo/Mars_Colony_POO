@@ -8,6 +8,7 @@ package com.mycompany.mavenproject1;
  *
  * @author dylnr
  */
+//Clases Criaturas
 public class Enjambre extends Criatura {
     
     public Enjambre(int vidaInicial, int costo, String nombre, int nivel) {

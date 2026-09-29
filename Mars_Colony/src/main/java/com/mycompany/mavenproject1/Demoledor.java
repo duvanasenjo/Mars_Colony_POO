@@ -8,6 +8,8 @@ package com.mycompany.mavenproject1;
  *
  * @author dylnr
  */
+
+//Clases Criaturas
 public class Demoledor extends Criatura {
     
     public Demoledor(int vidaInicial, int costo, String nombre,  int nivel) {
