@@ -10,8 +10,8 @@ package com.mycompany.mavenproject1;
  */
 public class Alcance_medio extends Defensa {
     
-    public Alcance_medio(int vidaInicial, int costo, String nombre, String equipo, int nivel) {
-        super(vidaInicial, costo, nombre, equipo, nivel);
+    public Alcance_medio(int vidaInicial, int costo, String nombre, int nivel) {
+        super(vidaInicial, costo, nombre, nivel);
     }
     
 }

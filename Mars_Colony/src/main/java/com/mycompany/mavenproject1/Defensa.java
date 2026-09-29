@@ -14,9 +14,10 @@ public class Defensa extends Personajes{
     private int capacidad_total;
     private int capacidad_utilizada;
     private int capacidad_restante;
+    private static final String EQUIPO = "Defensa";
 
-    public Defensa(int vidaInicial, int costo, String nombre, String equipo, int nivel) {
-        super(vidaInicial, costo, nombre, equipo, nivel);
+    public Defensa(int vidaInicial, int costo, String nombre, int nivel) {
+        super(vidaInicial, costo, nombre, nivel);
     }
     
     
