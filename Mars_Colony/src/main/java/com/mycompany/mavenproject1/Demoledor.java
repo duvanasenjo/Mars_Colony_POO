@@ -1,19 +1,22 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package com.mycompany.mavenproject1;
 
 /**
  *
  * @author dylnr
  */
-
-//Clases Criaturas
 public class Demoledor extends Criatura {
-    
-    public Demoledor(int vidaInicial, int costo, String nombre,  int nivel) {
-        super(vidaInicial, costo, nombre, nivel);
+
+    public Demoledor(String nombre, int vidaMaxima, int daño, int nivel) {
+        super(nombre, vidaMaxima, daño, nivel);
     }
-    
+
+    @Override
+    public void atacar(UnidadCombate objetivo) {
+        // TODO: se implementa en el paso 4 (ataques y movimiento)
+    }
+
+    @Override
+    public void mover() {
+        // TODO: se implementa en el paso 4 (ataques y movimiento)
+    }
 }

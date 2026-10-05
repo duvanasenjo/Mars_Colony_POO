@@ -1,7 +1,3 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package com.mycompany.mavenproject1;
 
 /**
@@ -9,9 +5,10 @@ package com.mycompany.mavenproject1;
  * @author duvan
  */
 public class Barrera extends Defensa {
-    
-    public Barrera(int vidaInicial, int costo, String nombre, int nivel) {
-        super(vidaInicial, costo, nombre, nivel);
+
+    public Barrera(String nombre, int vidaMaxima, int daño, int nivel, int costo) {
+        super(nombre, vidaMaxima, daño, nivel, costo);
     }
-    
+
+    // No ataca ni se mueve: solo bloquea el paso y absorbe daño.
 }

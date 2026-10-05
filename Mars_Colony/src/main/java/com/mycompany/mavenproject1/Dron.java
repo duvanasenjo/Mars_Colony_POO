@@ -1,17 +1,22 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package com.mycompany.mavenproject1;
 
 /**
  *
  * @author duvan
  */
-public class Dron extends Defensa {
-    
-    public Dron(int vidaInicial, int costo, String nombre, int nivel) {
-        super(vidaInicial, costo, nombre, nivel);
+public class Dron extends Defensa implements IAtacante, IMovibles {
+
+    public Dron(String nombre, int vidaMaxima, int daño, int nivel, int costo) {
+        super(nombre, vidaMaxima, daño, nivel, costo);
     }
-    
+
+    @Override
+    public void atacar(UnidadCombate objetivo) {
+        // TODO: se implementa en el paso 4 (ataques y movimiento)
+    }
+
+    @Override
+    public void mover() {
+        // TODO: se implementa en el paso 4 (ataques y movimiento)
+    }
 }

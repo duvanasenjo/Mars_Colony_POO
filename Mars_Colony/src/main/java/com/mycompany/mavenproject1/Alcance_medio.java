@@ -1,17 +1,17 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package com.mycompany.mavenproject1;
 
 /**
  *
  * @author duvan
  */
-public class Alcance_medio extends Defensa {
-    
-    public Alcance_medio(int vidaInicial, int costo, String nombre, int nivel) {
-        super(vidaInicial, costo, nombre, nivel);
+public class Alcance_medio extends Defensa implements IAtacante {
+
+    public Alcance_medio(String nombre, int vidaMaxima, int daño, int nivel, int costo) {
+        super(nombre, vidaMaxima, daño, nivel, costo);
     }
-    
+
+    @Override
+    public void atacar(UnidadCombate objetivo) {
+        // TODO: se implementa en el paso 4 (ataques y movimiento)
+    }
 }
