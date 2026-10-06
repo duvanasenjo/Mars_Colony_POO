@@ -36,4 +36,10 @@ public class Ataque_multiple extends Defensa implements IAtacante {
     public int getCantidadObjetivos() {
         return cantidadObjetivos;
     }
+
+    // En su turno solo ataca (no se mueve)
+    @Override
+    public void jugarTurno(Mapa mapa) {
+        atacar(mapa);
+    }
 }

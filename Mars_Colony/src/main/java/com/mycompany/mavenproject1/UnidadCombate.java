@@ -174,6 +174,12 @@ public abstract class UnidadCombate {
         return false; // todo ocupado: se queda quieta
     }
 
+    // Lo que hace la unidad en cada ciclo de la batalla.
+    // Por defecto NADA (así quedan Barrera y Núcleo).
+    // Las que atacan o se mueven lo sobrescriben.
+    public void jugarTurno(Mapa mapa) {
+    }
+
     // Deja la vida en 0. Lo usan Impacto y Demoledor después de explotar.
     public void destruir() {
         vidaActual = 0;

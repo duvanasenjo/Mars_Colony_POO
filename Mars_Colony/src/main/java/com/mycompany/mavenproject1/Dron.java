@@ -32,4 +32,11 @@ public class Dron extends Defensa implements IAtacante, IMovibles {
             darPasoHacia(mapa, destino.getPosicion());
         }
     }
+
+    // En su turno primero se acerca y luego ataca
+    @Override
+    public void jugarTurno(Mapa mapa) {
+        mover(mapa);
+        atacar(mapa);
+    }
 }

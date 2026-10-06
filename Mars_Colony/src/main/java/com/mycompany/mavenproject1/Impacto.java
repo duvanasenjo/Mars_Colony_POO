@@ -24,4 +24,10 @@ public class Impacto extends Defensa implements IAtacante {
             destruir(); // explota y desaparece
         }
     }
+
+    // En su turno solo ataca (no se mueve)
+    @Override
+    public void jugarTurno(Mapa mapa) {
+        atacar(mapa);
+    }
 }

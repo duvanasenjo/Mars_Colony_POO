@@ -13,6 +13,13 @@ public abstract class Criatura extends UnidadCombate implements IAtacante, IMovi
 
     // atacar() NO se implementa aquí: cada criatura ataca a su manera.
 
+    // En su turno, toda criatura primero se mueve y luego ataca.
+    @Override
+    public void jugarTurno(Mapa mapa) {
+        mover(mapa);
+        atacar(mapa);
+    }
+
     // Movimiento común de las criaturas terrestres: un paso hacia
     // su objetivo más cercano, salvo que ya lo tenga en su alcance.
     // Volador lo sobrescribe porque puede saltar barreras.

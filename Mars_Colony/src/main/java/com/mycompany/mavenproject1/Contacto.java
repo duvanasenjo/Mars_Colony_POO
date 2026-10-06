@@ -16,4 +16,10 @@ public class Contacto extends Defensa implements IAtacante {
         // Ataca a la criatura más cercana que esté pegada (distancia 1)
         atacarAlMasCercano(mapa, 1);
     }
+
+    // En su turno solo ataca (no se mueve)
+    @Override
+    public void jugarTurno(Mapa mapa) {
+        atacar(mapa);
+    }
 }

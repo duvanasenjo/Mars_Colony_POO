@@ -22,4 +22,10 @@ public class Alcance_medio extends Defensa implements IAtacante {
         // Dispara al objetivo más cercano dentro de su alcance
         atacarAlMasCercano(mapa, getAlcance());
     }
+
+    // En su turno solo ataca (no se mueve)
+    @Override
+    public void jugarTurno(Mapa mapa) {
+        atacar(mapa);
+    }
 }
