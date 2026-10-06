@@ -19,6 +19,8 @@ public abstract class UnidadCombate {
     private double frecuencia; // ataques por segundo (0.5 = uno cada 2 segundos)
     private Posicion posicion; // null hasta que el Mapa la coloque
     private RegistroCombate registro; // historial de combate de esta unidad
+    private int misionMinima;          // desde qué misión puede aparecer (empieza en 1)
+    private ArrayList<String> historialMejoras; // registro del crecimiento por misión
 
     public UnidadCombate(String nombre, int vidaMaxima, int daño, int nivel,
                          int costo, int alcance, int radio, double frecuencia) {
@@ -46,6 +48,8 @@ public abstract class UnidadCombate {
         this.radio = radio;
         this.frecuencia = frecuencia;
         this.registro = new RegistroCombate();
+        this.misionMinima = 1;
+        this.historialMejoras = new ArrayList<>();
     }
 
     // Por defecto las unidades son terrestres. Volador lo sobrescribe.
@@ -212,10 +216,37 @@ public abstract class UnidadCombate {
 
     // Porcentajes de 0.05 a 0.20 (5% a 20%). Igual para todas las unidades.
     public void mejorar(double porcentajeVida, double porcentajeDaño) {
-        vidaMaxima = (int) Math.round(vidaMaxima * (1 + porcentajeVida));
-        daño = (int) Math.round(daño * (1 + porcentajeDaño));
+        int nuevaVida = (int) Math.round(vidaMaxima * (1 + porcentajeVida));
+        // Con números pequeños el redondeo puede "comerse" el aumento
+        // (ej.: 2 + 5% = 2.1 -> 2). En ese caso sube al menos 1.
+        if (porcentajeVida > 0 && nuevaVida == vidaMaxima) {
+            nuevaVida = vidaMaxima + 1;
+        }
+        int nuevoDaño = (int) Math.round(daño * (1 + porcentajeDaño));
+        if (porcentajeDaño > 0 && daño > 0 && nuevoDaño == daño) {
+            nuevoDaño = daño + 1; // si el daño es 0 (Barrera, Núcleo) se queda en 0
+        }
+        vidaMaxima = nuevaVida;
+        daño = nuevoDaño;
         vidaActual = vidaMaxima;
         nivel++;
+    }
+
+    // Crecimiento al avanzar de misión: vida y daño suben cada uno
+    // un porcentaje AL AZAR entre 5% y 20% (por separado) y queda registrado.
+    public void mejorarAlAzar(int numeroMision) {
+        // Math.random() da un decimal entre 0 y 1, así que 0.05 + (0 a 0.15) = 5% a 20%
+        double porcentajeVida = 0.05 + Math.random() * 0.15;
+        double porcentajeDaño = 0.05 + Math.random() * 0.15;
+        int vidaAntes = vidaMaxima;
+        int dañoAntes = daño;
+
+        mejorar(porcentajeVida, porcentajeDaño);
+
+        int pv = (int) Math.round(porcentajeVida * 100);
+        int pd = (int) Math.round(porcentajeDaño * 100);
+        historialMejoras.add("Misión " + numeroMision + ": vida " + vidaAntes + " -> " + vidaMaxima
+                + " (+" + pv + "%), daño " + dañoAntes + " -> " + daño + " (+" + pd + "%)");
     }
 
     public String getNombre() {
@@ -265,5 +296,22 @@ public abstract class UnidadCombate {
 
     public RegistroCombate getRegistro() {
         return registro;
+    }
+
+    public int getMisionMinima() {
+        return misionMinima;
+    }
+
+    // Si viene un número menor que 1, se deja en 1
+    public void setMisionMinima(int misionMinima) {
+        if (misionMinima < 1) {
+            misionMinima = 1;
+        }
+        this.misionMinima = misionMinima;
+    }
+
+    // Se devuelve una copia para que nadie cambie el historial real
+    public ArrayList<String> getHistorialMejoras() {
+        return new ArrayList<>(historialMejoras);
     }
 }
