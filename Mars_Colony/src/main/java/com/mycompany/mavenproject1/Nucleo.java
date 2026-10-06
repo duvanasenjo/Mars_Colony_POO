@@ -14,6 +14,6 @@ package com.mycompany.mavenproject1;
 public class Nucleo extends UnidadCombate {
 
     public Nucleo(int vidaMaxima) {
-        super("Núcleo de oxígeno", vidaMaxima, 0, 1); // daño 0, nivel 1
+        super("Núcleo de oxígeno", vidaMaxima, 0, 1, 0, 0, 0, 0); // solo tiene vida
     }
 }

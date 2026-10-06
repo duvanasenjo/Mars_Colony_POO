@@ -6,14 +6,27 @@ package com.mycompany.mavenproject1;
  */
 public abstract class Defensa extends UnidadCombate {
 
-    private int costo; // puntos de capacidad que cuesta colocarla
-
-    public Defensa(String nombre, int vidaMaxima, int daño, int nivel, int costo) {
-        super(nombre, vidaMaxima, daño, nivel);
-        this.costo = costo;
+    public Defensa(String nombre, int vidaMaxima, int daño, int nivel,
+                    int costo, int alcance, int radio, double frecuencia) {
+        super(nombre, vidaMaxima, daño, nivel, costo, alcance, radio, frecuencia);
     }
 
-    public int getCosto() {
-        return costo;
+    // Por defecto una defensa NO puede atacar unidades aéreas.
+    // Las antiaéreas (Alcance_medio y Dron) lo sobrescriben.
+    public boolean puedeAtacarAereos() {
+        return false;
+    }
+
+    // Una defensa solo ataca criaturas.
+    // A las aéreas, solo si es antiaérea.
+    @Override
+    public boolean puedeAtacarA(UnidadCombate otra) {
+        if (!otra.esCriatura()) {
+            return false;
+        }
+        if (otra.esAerea() && !puedeAtacarAereos()) {
+            return false;
+        }
+        return true;
     }
 }

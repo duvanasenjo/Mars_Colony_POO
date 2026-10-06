@@ -1,22 +1,19 @@
 package com.mycompany.mavenproject1;
 
 /**
+ * Ataca a distancia: alcance configurable, sin radio.
  *
  * @author dylnr
  */
 public class Escupidor extends Criatura {
 
-    public Escupidor(String nombre, int vidaMaxima, int daño, int nivel) {
-        super(nombre, vidaMaxima, daño, nivel);
+    public Escupidor(String nombre, int vidaMaxima, int daño, int nivel, int costo, double frecuencia, int alcance) {
+        super(nombre, vidaMaxima, daño, nivel, costo, alcance, 0, frecuencia);
     }
 
     @Override
-    public void atacar(UnidadCombate objetivo) {
-        // TODO: se implementa en el paso 4 (ataques y movimiento)
-    }
-
-    @Override
-    public void mover() {
-        // TODO: se implementa en el paso 4 (ataques y movimiento)
+    public void atacar(Mapa mapa) {
+        // Escupe al objetivo más cercano dentro de su alcance
+        atacarAlMasCercano(mapa, getAlcance());
     }
 }
