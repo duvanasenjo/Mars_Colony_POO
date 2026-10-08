@@ -1,12 +1,13 @@
 package com.mycompany.mavenproject1;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 
 /**
  *
  * @author dylnr
  */
-public abstract class UnidadCombate {
+public abstract class UnidadCombate implements Serializable {
 
     private String nombre;
     private int vidaMaxima;
@@ -21,6 +22,10 @@ public abstract class UnidadCombate {
     private RegistroCombate registro; // historial de combate de esta unidad
     private int misionMinima;          // desde qué misión puede aparecer (empieza en 1)
     private ArrayList<String> historialMejoras; // registro del crecimiento por misión
+    private boolean activo;                // si está desactivada, el juego no la usa
+    private String rutaImagenNormal;       // imágenes que pide el enunciado
+    private String rutaImagenMovimiento;
+    private String rutaImagenAtaque;
 
     public UnidadCombate(String nombre, int vidaMaxima, int daño, int nivel,
                          int costo, int alcance, int radio, double frecuencia) {
@@ -50,6 +55,20 @@ public abstract class UnidadCombate {
         this.registro = new RegistroCombate();
         this.misionMinima = 1;
         this.historialMejoras = new ArrayList<>();
+        this.activo = true;
+        this.rutaImagenNormal = "";
+        this.rutaImagenMovimiento = "";
+        this.rutaImagenAtaque = "";
+    }
+
+    // Pasa a una copia los datos que no van en el constructor.
+    // Lo usan los copiar() de las 11 clases concretas.
+    public void copiarDatosA(UnidadCombate copia) {
+        copia.setMisionMinima(misionMinima);
+        copia.setActivo(activo);
+        copia.setRutaImagenNormal(rutaImagenNormal);
+        copia.setRutaImagenMovimiento(rutaImagenMovimiento);
+        copia.setRutaImagenAtaque(rutaImagenAtaque);
     }
 
     // Por defecto las unidades son terrestres. Volador lo sobrescribe.
@@ -249,6 +268,16 @@ public abstract class UnidadCombate {
                 + " (+" + pv + "%), daño " + dañoAntes + " -> " + daño + " (+" + pd + "%)");
     }
 
+    // Nombre del tipo concreto ("Dron", "Acechador"...). Cada subclase dice
+    // el suyo (polimorfismo); lo usan la fábrica y el programa de administración.
+    public abstract String getTipo();
+
+    // Cantidad de objetivos o de ataques por turno. Solo Ataque_multiple y
+    // Enjambre la usan (la sobrescriben); para los demás tipos es 0.
+    public int getCantidad() {
+        return 0;
+    }
+
     public String getNombre() {
         return nombre;
     }
@@ -313,5 +342,47 @@ public abstract class UnidadCombate {
     // Se devuelve una copia para que nadie cambie el historial real
     public ArrayList<String> getHistorialMejoras() {
         return new ArrayList<>(historialMejoras);
+    }
+
+    public boolean isActivo() {
+        return activo;
+    }
+
+    public void setActivo(boolean activo) {
+        this.activo = activo;
+    }
+
+    public String getRutaImagenNormal() {
+        return rutaImagenNormal;
+    }
+
+    // Si viene null se guarda "" (sin imagen)
+    public void setRutaImagenNormal(String ruta) {
+        if (ruta == null) {
+            ruta = "";
+        }
+        this.rutaImagenNormal = ruta;
+    }
+
+    public String getRutaImagenMovimiento() {
+        return rutaImagenMovimiento;
+    }
+
+    public void setRutaImagenMovimiento(String ruta) {
+        if (ruta == null) {
+            ruta = "";
+        }
+        this.rutaImagenMovimiento = ruta;
+    }
+
+    public String getRutaImagenAtaque() {
+        return rutaImagenAtaque;
+    }
+
+    public void setRutaImagenAtaque(String ruta) {
+        if (ruta == null) {
+            ruta = "";
+        }
+        this.rutaImagenAtaque = ruta;
     }
 }

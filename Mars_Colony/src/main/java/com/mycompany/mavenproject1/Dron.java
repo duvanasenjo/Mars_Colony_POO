@@ -39,4 +39,18 @@ public class Dron extends Defensa implements IAtacante, IMovibles {
         mover(mapa);
         atacar(mapa);
     }
+
+    // Copia nueva del mismo tipo, con los mismos valores actuales
+    // (vida llena, sin posición y con registro vacío).
+    @Override
+    public Defensa copiar() {
+        Dron copia = new Dron(getNombre(), getVidaMaxima(), getDaño(), getNivel(), getCosto(), getFrecuencia(), getAlcance());
+        copiarDatosA(copia); // misión mínima, activo e imágenes
+        return copia;
+    }
+
+    @Override
+    public String getTipo() {
+        return FabricaUnidades.DRON;
+    }
 }

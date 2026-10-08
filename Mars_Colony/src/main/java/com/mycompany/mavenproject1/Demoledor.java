@@ -25,4 +25,18 @@ public class Demoledor extends Criatura {
             destruir(); // explota y desaparece
         }
     }
+
+    // Copia nueva del mismo tipo, con los mismos valores actuales
+    // (vida llena, sin posición y con registro vacío).
+    @Override
+    public Criatura copiar() {
+        Demoledor copia = new Demoledor(getNombre(), getVidaMaxima(), getDaño(), getNivel(), getCosto(), getFrecuencia(), getRadio());
+        copiarDatosA(copia); // misión mínima, activo e imágenes
+        return copia;
+    }
+
+    @Override
+    public String getTipo() {
+        return FabricaUnidades.DEMOLEDOR;
+    }
 }

@@ -50,4 +50,18 @@ public class Volador extends Criatura {
         }
         darPasoHacia(mapa, destino.getPosicion()); // si no pudo saltar, intenta rodear
     }
+
+    // Copia nueva del mismo tipo, con los mismos valores actuales
+    // (vida llena, sin posición y con registro vacío).
+    @Override
+    public Criatura copiar() {
+        Volador copia = new Volador(getNombre(), getVidaMaxima(), getDaño(), getNivel(), getCosto(), getFrecuencia());
+        copiarDatosA(copia); // misión mínima, activo e imágenes
+        return copia;
+    }
+
+    @Override
+    public String getTipo() {
+        return FabricaUnidades.VOLADOR;
+    }
 }

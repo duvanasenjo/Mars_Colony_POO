@@ -29,4 +29,8 @@ public abstract class Defensa extends UnidadCombate {
         }
         return true;
     }
+
+    // Cada defensa concreta sabe crear una copia de SU MISMO tipo.
+    // Se usa para colocar defensas en cada batalla a partir de las plantillas.
+    public abstract Defensa copiar();
 }

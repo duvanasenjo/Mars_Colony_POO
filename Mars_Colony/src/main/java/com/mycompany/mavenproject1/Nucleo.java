@@ -15,5 +15,14 @@ public class Nucleo extends UnidadCombate {
 
     public Nucleo(int vidaMaxima) {
         super("Núcleo de oxígeno", vidaMaxima, 0, 1, 0, 0, 0, 0); // solo tiene vida
+        // Sus imágenes van fijas: el núcleo no se configura en el catálogo
+        setRutaImagenNormal("imagenes/nucleo_normal.gif");
+        setRutaImagenMovimiento("imagenes/nucleo_movimiento.gif");
+        setRutaImagenAtaque("imagenes/nucleo_ataque.gif");
+    }
+
+    @Override
+    public String getTipo() {
+        return "Núcleo";
     }
 }

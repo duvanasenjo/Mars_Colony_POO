@@ -42,4 +42,8 @@ public abstract class Criatura extends UnidadCombate implements IAtacante, IMovi
     public boolean puedeAtacarA(UnidadCombate otra) {
         return !otra.esCriatura();
     }
+
+    // Cada criatura concreta sabe crear una copia de SU MISMO tipo.
+    // Se usa para crear el ejército de cada misión a partir de las plantillas.
+    public abstract Criatura copiar();
 }

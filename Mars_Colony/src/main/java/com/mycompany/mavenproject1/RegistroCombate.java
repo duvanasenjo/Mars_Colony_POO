@@ -1,5 +1,6 @@
 package com.mycompany.mavenproject1;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 
 /**
@@ -10,7 +11,7 @@ import java.util.ArrayList;
  *
  * @author dylnr
  */
-public class RegistroCombate {
+public class RegistroCombate implements Serializable {
 
     private ArrayList<EntradaRegistro> objetivosAtacados;
     private ArrayList<EntradaRegistro> atacantesRecibidos;

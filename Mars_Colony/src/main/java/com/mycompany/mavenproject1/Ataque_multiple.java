@@ -42,4 +42,23 @@ public class Ataque_multiple extends Defensa implements IAtacante {
     public void jugarTurno(Mapa mapa) {
         atacar(mapa);
     }
+
+    // Copia nueva del mismo tipo, con los mismos valores actuales
+    // (vida llena, sin posición y con registro vacío).
+    @Override
+    public Defensa copiar() {
+        Ataque_multiple copia = new Ataque_multiple(getNombre(), getVidaMaxima(), getDaño(), getNivel(), getCosto(), getFrecuencia(), getAlcance(), cantidadObjetivos);
+        copiarDatosA(copia); // misión mínima, activo e imágenes
+        return copia;
+    }
+
+    @Override
+    public String getTipo() {
+        return FabricaUnidades.ATAQUE_MULTIPLE;
+    }
+
+    @Override
+    public int getCantidad() {
+        return getCantidadObjetivos();
+    }
 }

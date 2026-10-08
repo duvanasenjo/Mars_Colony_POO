@@ -1,12 +1,14 @@
 package com.mycompany.mavenproject1;
 
+import java.io.Serializable;
+
 /**
  * Representa una coordenada (fila, columna) dentro del mapa.
  * Es inmutable: para mover una unidad se le asigna una Posicion nueva.
  *
  * @author dylnr
  */
-public class Posicion {
+public class Posicion implements Serializable {
 
     private final int fila;
     private final int columna;

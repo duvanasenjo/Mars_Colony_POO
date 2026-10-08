@@ -22,4 +22,18 @@ public class Barrera extends Defensa {
     public boolean puedeAtacarA(UnidadCombate otra) {
         return false;
     }
+
+    // Copia nueva del mismo tipo, con los mismos valores actuales
+    // (vida llena, sin posición y con registro vacío).
+    @Override
+    public Defensa copiar() {
+        Barrera copia = new Barrera(getNombre(), getVidaMaxima(), getNivel(), getCosto());
+        copiarDatosA(copia); // misión mínima, activo e imágenes
+        return copia;
+    }
+
+    @Override
+    public String getTipo() {
+        return FabricaUnidades.BARRERA;
+    }
 }
