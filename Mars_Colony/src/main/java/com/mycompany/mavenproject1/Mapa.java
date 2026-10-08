@@ -1,5 +1,6 @@
 package com.mycompany.mavenproject1;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 
 /**
@@ -12,7 +13,7 @@ import java.util.ArrayList;
  *
  * @author dylnr
  */
-public class Mapa {
+public class Mapa implements Serializable {
 
     public static final int TAMAÑO = 25;
 
@@ -30,6 +31,13 @@ public class Mapa {
     // ¿La coordenada está dentro del mapa?
     public boolean estaDentro(int fila, int columna) {
         return fila >= 0 && fila < TAMAÑO && columna >= 0 && columna < TAMAÑO;
+    }
+
+    // ¿La celda está en el borde del mapa (primera o última fila o columna)?
+    // El borde es "fuera del perímetro": ahí aparecen las criaturas.
+    public boolean esBorde(int fila, int columna) {
+        int ultimo = TAMAÑO - 1;
+        return fila == 0 || fila == ultimo || columna == 0 || columna == ultimo;
     }
 
     // ¿La celda está dentro del mapa y vacía?
