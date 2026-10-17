@@ -30,4 +30,5 @@ public class Estilo {
     public static final Color CASILLA_CRIATURA = new Color(250, 150, 130); // salmón
     public static final Color CASILLA_NUCLEO = new Color(200, 245, 200);   // verde claro
     public static final Color CASILLA_SELECCION = Color.YELLOW;            // la que se está viendo
+    public static final Color CASILLA_GOLPE = new Color(255, 60, 40);       // destello al recibir un golpe
 }

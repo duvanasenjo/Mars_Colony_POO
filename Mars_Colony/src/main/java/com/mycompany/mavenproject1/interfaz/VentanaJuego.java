@@ -57,6 +57,9 @@ public class VentanaJuego extends javax.swing.JFrame implements ActionListener {
     // Íconos ya creados (misma posición en las dos listas), para no reducir la imagen cada vez
     private ArrayList<String> rutasIconos;
     private ArrayList<ImageIcon> iconos;
+    // Unidades que murieron en esta batalla: en su última casilla queda una calavera
+    private ArrayList<UnidadCombate> muertas;
+    public static final String IMAGEN_MUERTE = "imagenes/muerte.png";
 
     public VentanaJuego() {
         initComponents();   // arma todo lo diseñado en Design (lo escribe NetBeans)
@@ -67,6 +70,7 @@ public class VentanaJuego extends javax.swing.JFrame implements ActionListener {
         this.unidadSeleccionada = null;
         this.rutasIconos = new ArrayList<String>();
         this.iconos = new ArrayList<ImageIcon>();
+        this.muertas = new ArrayList<UnidadCombate>();
         // El reloj llama a actionPerformed (de esta clase) cada REFRESCO milisegundos
         this.reloj = new Timer(REFRESCO, this);
         this.reloj.setActionCommand(TIC);
@@ -392,6 +396,7 @@ public class VentanaJuego extends javax.swing.JFrame implements ActionListener {
             return;
         }
         unidadSeleccionada = null;
+        muertas = new ArrayList<UnidadCombate>();   // batalla nueva: sin calaveras
         txtRegistro.setText("");
         lblUnidad.setText("Haz clic en una unidad del mapa para ver su registro.");
         lblTituloBatalla.setText("BATALLA - " + textoMision(partida));
@@ -407,6 +412,7 @@ public class VentanaJuego extends javax.swing.JFrame implements ActionListener {
     private void refrescarBatalla() {
         Batalla batalla = partida.getBatallaActual();
         Mapa mapa = batalla.getMapa();
+        anotarMuertes(batalla);
         for (int fila = 0; fila < Mapa.TAMAÑO; fila++) {
             for (int columna = 0; columna < Mapa.TAMAÑO; columna++) {
                 pintarCasillaBatalla(casillasBatalla[fila][columna], mapa, fila, columna);
@@ -458,9 +464,14 @@ public class VentanaJuego extends javax.swing.JFrame implements ActionListener {
         UnidadCombate unidad = mapa.obtener(fila, columna);
         casilla.setBackground(colorCasilla(mapa, unidad, fila, columna));
         if (unidad == null) {
-            casilla.setIcon(null);
+            // Si alguien murió aquí, queda la calavera hasta que termine la batalla.
+            // (Si otra unidad se para encima, se ve la unidad: este if solo es para casillas vacías.)
+            casilla.setIcon(icono(muerteEn(fila, columna)));
             casilla.setToolTipText(null);
             return;
+        }
+        if (unidad.recibioGolpeRecien()) {
+            casilla.setBackground(Estilo.CASILLA_GOLPE);   // destello rojo: le acaban de pegar
         }
         // Imagen según lo que está haciendo: normal, movimiento o ataque
         ImageIcon imagen = icono(unidad.getRutaImagenActual());
@@ -469,6 +480,29 @@ public class VentanaJuego extends javax.swing.JFrame implements ActionListener {
         }
         casilla.setIcon(imagen);
         casilla.setToolTipText(unidad.getNombre() + " - vida " + unidad.getVidaActual() + "/" + unidad.getVidaMaxima());
+    }
+
+    // Anota las unidades que acaban de morir, para dejar su calavera.
+    private void anotarMuertes(Batalla batalla) {
+        ArrayList<UnidadCombate> todas = new ArrayList<UnidadCombate>();
+        todas.addAll(batalla.getDefensas());
+        todas.addAll(batalla.getCriaturas());
+        for (UnidadCombate unidad : todas) {
+            if (!unidad.estaViva() && !muertas.contains(unidad)) {
+                muertas.add(unidad);
+            }
+        }
+    }
+
+    // Ruta de la calavera si en esa casilla murió alguien en esta batalla; si no, null.
+    private String muerteEn(int fila, int columna) {
+        for (UnidadCombate muerta : muertas) {
+            Posicion p = muerta.getPosicionFinal();
+            if (p != null && p.getFila() == fila && p.getColumna() == columna) {
+                return IMAGEN_MUERTE;
+            }
+        }
+        return null;
     }
 
     // Color de fondo de una casilla (lo usan los dos mapas).

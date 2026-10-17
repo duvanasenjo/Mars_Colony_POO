@@ -86,26 +86,26 @@ public class GeneradorDatosPrueba {
         catalogo.agregarDefensa(vieja);
         catalogo.desactivar("Torreta antigua");
 
-        // ----- Criaturas (decisión de diseño) -----
-        Acechador acechador = new Acechador("Acechador", 10, 2, 1, 1, 1.0);
+        // ----- Criaturas (decisión de diseño, ajustadas probando batallas para que haya reto) -----
+        Acechador acechador = new Acechador("Acechador", 14, 2, 1, 1, 1.0);
         ponerImagenes(acechador, "acechador");
         catalogo.agregarCriatura(acechador);
 
-        Escupidor escupidor = new Escupidor("Escupidor", 7, 2, 1, 2, 1.0, 3);
+        Escupidor escupidor = new Escupidor("Escupidor", 9, 2, 1, 2, 1.0, 3);
         ponerImagenes(escupidor, "escupidor");
         catalogo.agregarCriatura(escupidor);
 
-        Volador volador = new Volador("Volador", 6, 2, 1, 2, 1.0);
+        Volador volador = new Volador("Volador", 8, 2, 1, 2, 1.0);
         volador.setMisionMinima(2);
         ponerImagenes(volador, "volador");
         catalogo.agregarCriatura(volador);
 
-        Enjambre enjambre = new Enjambre("Enjambre", 8, 1, 1, 2, 2.0, 2, 3);
+        Enjambre enjambre = new Enjambre("Enjambre", 10, 1, 1, 2, 1.0, 2, 3);
         enjambre.setMisionMinima(3);
         ponerImagenes(enjambre, "enjambre");
         catalogo.agregarCriatura(enjambre);
 
-        Demoledor demoledor = new Demoledor("Demoledor", 12, 10, 1, 3, 0.5, 2);
+        Demoledor demoledor = new Demoledor("Demoledor", 22, 10, 1, 3, 1.0, 2);
         demoledor.setMisionMinima(5);
         ponerImagenes(demoledor, "demoledor");
         catalogo.agregarCriatura(demoledor);

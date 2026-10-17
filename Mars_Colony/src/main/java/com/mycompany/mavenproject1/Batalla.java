@@ -19,7 +19,7 @@ import java.util.ArrayList;
  */
 public class Batalla implements Serializable {
 
-    public static final long PAUSA_BASE = 800;      // ms entre turnos con frecuencia 1.0
+    public static final long PAUSA_BASE = 2000;      // ms entre turnos con frecuencia 1.0
     public static final int LIMITE_SEGUNDOS = 180;  // 3 minutos (decisión de diseño)
 
     private Mapa mapa;

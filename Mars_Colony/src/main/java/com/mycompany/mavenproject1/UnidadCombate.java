@@ -18,7 +18,7 @@ public abstract class UnidadCombate implements Serializable {
     public static final String NORMAL = "normal";
     public static final String MOVIMIENTO = "movimiento";
     public static final String ATAQUE = "ataque";
-    public static final long DURACION_ESTADO = 600; // ms que se ve la imagen de movimiento o ataque
+    public static final long DURACION_ESTADO = 1000; // ms que se ve la imagen de movimiento o ataque
 
     private String nombre;
     private int vidaMaxima;
@@ -32,6 +32,7 @@ public abstract class UnidadCombate implements Serializable {
     private Posicion posicionFinal; // última casilla donde estuvo (se conserva aunque muera)
     private String estado;          // NORMAL, MOVIMIENTO o ATAQUE
     private long momentoEstado;     // hora (ms) en que cambió el estado
+    private long momentoGolpe;      // hora (ms) del último golpe recibido (0 = nunca)
     private RegistroCombate registro; // historial de combate de esta unidad
     private int misionMinima;          // desde qué misión puede aparecer (empieza en 1)
     private ArrayList<String> historialMejoras; // registro del crecimiento por misión
@@ -226,6 +227,14 @@ public abstract class UnidadCombate implements Serializable {
     // Resta vida; nunca baja de 0
     public void recibirDaño(int cantidad) {
         vidaActual = Math.max(0, vidaActual - cantidad);
+        if (cantidad > 0) {
+            momentoGolpe = System.currentTimeMillis();   // para que la interfaz la "encienda" en rojo
+        }
+    }
+
+    // true durante DURACION_ESTADO ms después de recibir un golpe
+    public boolean recibioGolpeRecien() {
+        return System.currentTimeMillis() - momentoGolpe < DURACION_ESTADO;
     }
 
     // La forma de hacer daño: le quita vida al objetivo
