@@ -1,12 +1,14 @@
 package com.mycompany.mavenproject1;
 
+import java.io.Serializable;
+
 /**
  * Una línea del registro de combate: cuántos golpes y cuánto daño
  * hubo con OTRA unidad. Ejemplo: "Acechador: 3 golpes, 12 de daño".
  *
  * @author dylnr
  */
-public class EntradaRegistro {
+public class EntradaRegistro implements Serializable {
 
     private UnidadCombate otraUnidad;
     private int golpes;
@@ -38,6 +40,10 @@ public class EntradaRegistro {
 
     @Override
     public String toString() {
-        return otraUnidad.getNombre() + ": " + golpes + " golpes, " + dañoTotal + " de daño";
+        String palabra = "golpes";
+        if (golpes == 1) {
+            palabra = "golpe";   // "1 golpe", "3 golpes"
+        }
+        return otraUnidad.getNombre() + ": " + golpes + " " + palabra + ", " + dañoTotal + " de daño";
     }
 }

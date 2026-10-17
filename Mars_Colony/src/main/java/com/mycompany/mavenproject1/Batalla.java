@@ -1,26 +1,114 @@
 package com.mycompany.mavenproject1;
 
+import com.mycompany.mavenproject1.hilos.HiloMapa;
+import com.mycompany.mavenproject1.hilos.HiloUnidad;
+import java.io.Serializable;
 import java.util.ArrayList;
 
 /**
- * Dirige una batalla sobre un mapa: coloca las unidades, ejecuta los
- * ciclos (cada unidad juega su turno) y sabe cuándo termina y quién ganó.
- * Por ahora sin hilos (eso va en la etapa 8).
+ * Dirige una batalla sobre un mapa: coloca las unidades, la hace correr
+ * y sabe cuándo termina y quién ganó.
+ *
+ * Hay dos formas de jugarla:
+ *  - CON HILOS (la del juego): iniciar() arranca un HiloUnidad por cada
+ *    unidad y un HiloMapa. Las unidades piden turno en la ColaTurnos y el
+ *    HiloMapa los ejecuta en orden.
+ *  - SIN HILOS (para pruebas): jugar() / ejecutarCiclo(), todas en orden.
  *
  * @author dylnr
  */
-public class Batalla {
+public class Batalla implements Serializable {
+
+    public static final long PAUSA_BASE = 800;      // ms entre turnos con frecuencia 1.0
+    public static final int LIMITE_SEGUNDOS = 180;  // 3 minutos (decisión de diseño)
 
     private Mapa mapa;
     private ArrayList<Defensa> defensas;   // colección polimórfica
     private ArrayList<Criatura> criaturas; // colección polimórfica
     private int ciclosJugados;
 
+    // ----- Para la batalla con hilos -----
+    private ColaTurnos colaTurnos;   // fila de unidades que pidieron turno
+    private boolean enCurso;         // true mientras los hilos deben seguir
+    private long inicio;             // hora en que empezó (milisegundos)
+    private long fin;                // hora en que terminó (0 si sigue)
+    private boolean tiempoAgotado;   // true si terminó por el límite de tiempo
+
     public Batalla(Mapa mapa) {
         this.mapa = mapa;
         this.defensas = new ArrayList<>();
         this.criaturas = new ArrayList<>();
         this.ciclosJugados = 0;
+        this.colaTurnos = new ColaTurnos();
+        this.enCurso = false;
+        this.inicio = 0;
+        this.fin = 0;
+        this.tiempoAgotado = false;
+    }
+
+    // ----- Batalla con hilos -----
+
+    // Arranca un hilo por cada defensa ACTIVA y criatura viva, y el hilo del mapa.
+    // start() pone a correr el run() de cada hilo al mismo tiempo.
+    public void iniciar() {
+        if (enCurso) {
+            return;   // ya estaba corriendo
+        }
+        colaTurnos = new ColaTurnos();
+        enCurso = true;
+        tiempoAgotado = false;
+        // System.currentTimeMillis(): la hora actual en milisegundos
+        inicio = System.currentTimeMillis();
+        fin = 0;
+        for (Defensa defensa : defensas) {
+            // La barrera no ataca ni se mueve: no necesita hilo (solo bloquea y recibe daño)
+            if (defensa.estaViva() && !defensa.esBarrera()) {
+                HiloUnidad hilo = new HiloUnidad(defensa, this);
+                hilo.start();
+            }
+        }
+        for (Criatura criatura : criaturas) {
+            if (criatura.estaViva()) {
+                HiloUnidad hilo = new HiloUnidad(criatura, this);
+                hilo.start();
+            }
+        }
+        HiloMapa hiloMapa = new HiloMapa(this);
+        hiloMapa.start();
+    }
+
+    // Avisa a todos los hilos que terminen (cada uno sale de su while).
+    public void detener() {
+        terminar();
+    }
+
+    // La llama el HiloMapa después de cada turno.
+    public void revisarFin() {
+        if (haTerminado()) {
+            terminar();
+        } else if (getSegundos() >= LIMITE_SEGUNDOS) {
+            tiempoAgotado = true;
+            terminar();
+        }
+    }
+
+    // Apaga la batalla y congela el reloj.
+    private void terminar() {
+        if (enCurso) {
+            fin = System.currentTimeMillis();
+        }
+        enCurso = false;
+    }
+
+    // Segundos que lleva la batalla (0 si no ha empezado).
+    public int getSegundos() {
+        if (inicio == 0) {
+            return 0;
+        }
+        if (fin != 0) {
+            return (int) ((fin - inicio) / 1000);   // ya terminó: reloj congelado
+        }
+        return (int) ((System.currentTimeMillis() - inicio) / 1000);
     }
 
     // Coloca una defensa donde el jugador la eligió.
@@ -31,6 +119,18 @@ public class Batalla {
             return true;
         }
         return false;
+    }
+
+    // Quita una defensa durante la preparación (el jugador se arrepintió).
+    // La saca del mapa y de la lista, así su costo vuelve a quedar libre.
+    // Devuelve false si esa defensa no está en esta batalla.
+    public boolean quitarDefensa(Defensa defensa) {
+        if (!defensas.contains(defensa)) {
+            return false;
+        }
+        mapa.quitar(defensa);
+        defensas.remove(defensa);
+        return true;
     }
 
     // Coloca una criatura en una casilla libre AL AZAR del borde del mapa
@@ -55,11 +155,9 @@ public class Batalla {
     // y de la primera y última columna.
     private ArrayList<Posicion> casillasLibresDelBorde() {
         ArrayList<Posicion> libres = new ArrayList<>();
-        int ultimo = Mapa.TAMAÑO - 1;
         for (int f = 0; f < Mapa.TAMAÑO; f++) {
             for (int c = 0; c < Mapa.TAMAÑO; c++) {
-                boolean esBorde = (f == 0 || f == ultimo || c == 0 || c == ultimo);
-                if (esBorde && mapa.estaLibre(f, c)) {
+                if (mapa.esBorde(f, c) && mapa.estaLibre(f, c)) {
                     libres.add(new Posicion(f, c));
                 }
             }
@@ -86,7 +184,8 @@ public class Batalla {
 
     // Quita del mapa a los muertos para liberar sus casillas.
     // NO los quita de las listas: al final se necesita su registro.
-    private void quitarMuertos() {
+    // Es public porque también lo llama el HiloMapa.
+    public void quitarMuertos() {
         for (Defensa defensa : defensas) {
             if (!defensa.estaViva() && defensa.getPosicion() != null) {
                 mapa.quitar(defensa);
@@ -112,9 +211,10 @@ public class Batalla {
         return true;
     }
 
-    // Ganan las defensas si el núcleo sigue vivo y todas las criaturas murieron.
+    // Ganan las defensas si el núcleo sigue vivo y, o murieron todas las
+    // criaturas, o se acabó el tiempo límite.
     public boolean ganaronLasDefensas() {
-        return mapa.getNucleo().estaViva() && haTerminado();
+        return mapa.getNucleo().estaViva() && (haTerminado() || tiempoAgotado);
     }
 
     // Juega ciclos hasta que la batalla termine.
@@ -131,6 +231,18 @@ public class Batalla {
 
     public int getCiclosJugados() {
         return ciclosJugados;
+    }
+
+    public ColaTurnos getColaTurnos() {
+        return colaTurnos;
+    }
+
+    public boolean isEnCurso() {
+        return enCurso;
+    }
+
+    public boolean isTiempoAgotado() {
+        return tiempoAgotado;
     }
 
     // Se devuelven copias para que nadie de afuera cambie las listas reales
