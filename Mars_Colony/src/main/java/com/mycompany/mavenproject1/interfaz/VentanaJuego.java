@@ -1,6 +1,8 @@
 package com.mycompany.mavenproject1.interfaz;
 
 import com.mycompany.mavenproject1.*;
+import com.mycompany.mavenproject1.archivos.ArchivoCatalogo;
+import com.mycompany.mavenproject1.archivos.ArchivoPartidas;
 
 import java.awt.CardLayout;
 import java.awt.Color;
@@ -69,6 +71,7 @@ public class VentanaJuego extends javax.swing.JFrame implements ActionListener {
         this.reloj = new Timer(REFRESCO, this);
         this.reloj.setActionCommand(TIC);
         crearCasillas();
+        aplicarEstilo();    // colores de fondo y títulos (ver la sección ESTILO)
         mostrarInicio();
     }
 
@@ -363,11 +366,7 @@ public class VentanaJuego extends javax.swing.JFrame implements ActionListener {
                     casilla.setIcon(icono(unidad.getRutaImagenNormal()));
                     casilla.setToolTipText(unidad.getNombre());   // nombre al dejar el mouse encima
                 }
-                if (mapa.esBorde(fila, columna)) {
-                    casilla.setBackground(new Color(255, 205, 205));   // rosado
-                } else {
-                    casilla.setBackground(Color.WHITE);
-                }
+                casilla.setBackground(colorCasilla(mapa, unidad, fila, columna));
             }
         }
         barraCapacidad.setMaximum(partida.getCapacidadTotal());
@@ -417,6 +416,15 @@ public class VentanaJuego extends javax.swing.JFrame implements ActionListener {
         barraNucleo.setMaximum(nucleo.getVidaMaxima());
         barraNucleo.setValue(nucleo.getVidaActual());
         barraNucleo.setString(nucleo.getVidaActual() + " / " + nucleo.getVidaMaxima());
+        // La barra cambia de color según cuánta vida le queda al núcleo
+        int porcentaje = nucleo.getVidaActual() * 100 / nucleo.getVidaMaxima();
+        if (porcentaje >= 60) {
+            barraNucleo.setForeground(Estilo.VERDE);
+        } else if (porcentaje >= 30) {
+            barraNucleo.setForeground(Estilo.AMARILLO);
+        } else {
+            barraNucleo.setForeground(Estilo.ROJO);
+        }
         lblTiempo.setText("Tiempo: " + batalla.getSegundos() + " s  (límite " + Batalla.LIMITE_SEGUNDOS + " s)");
 
         int criaturasVivas = 0;
@@ -448,28 +456,40 @@ public class VentanaJuego extends javax.swing.JFrame implements ActionListener {
 
     private void pintarCasillaBatalla(JButton casilla, Mapa mapa, int fila, int columna) {
         UnidadCombate unidad = mapa.obtener(fila, columna);
+        casilla.setBackground(colorCasilla(mapa, unidad, fila, columna));
         if (unidad == null) {
             casilla.setIcon(null);
             casilla.setToolTipText(null);
-            if (mapa.esBorde(fila, columna)) {
-                casilla.setBackground(new Color(255, 205, 205));   // rosado: borde
-            } else {
-                casilla.setBackground(Color.WHITE);
-            }
             return;
         }
-        casilla.setIcon(icono(unidad.getRutaImagenNormal()));
-        casilla.setToolTipText(unidad.getNombre() + " - vida " + unidad.getVidaActual() + "/" + unidad.getVidaMaxima());
-        // Color de fondo según el bando (lo responde la propia unidad: polimorfismo)
-        if (unidad == unidadSeleccionada) {
-            casilla.setBackground(Color.YELLOW);                // la que se está viendo
-        } else if (unidad == mapa.getNucleo()) {
-            casilla.setBackground(new Color(200, 245, 200));   // verde: núcleo
-        } else if (unidad.esCriatura()) {
-            casilla.setBackground(new Color(255, 215, 170));   // naranja: criatura
-        } else {
-            casilla.setBackground(new Color(205, 225, 255));   // celeste: defensa
+        // Imagen según lo que está haciendo: normal, movimiento o ataque
+        ImageIcon imagen = icono(unidad.getRutaImagenActual());
+        if (imagen == null) {
+            imagen = icono(unidad.getRutaImagenNormal());   // esa imagen no existe: se usa la normal
         }
+        casilla.setIcon(imagen);
+        casilla.setToolTipText(unidad.getNombre() + " - vida " + unidad.getVidaActual() + "/" + unidad.getVidaMaxima());
+    }
+
+    // Color de fondo de una casilla (lo usan los dos mapas).
+    // El bando lo responde la propia unidad con esCriatura(): polimorfismo.
+    private Color colorCasilla(Mapa mapa, UnidadCombate unidad, int fila, int columna) {
+        if (unidad == null) {
+            if (mapa.esBorde(fila, columna)) {
+                return Estilo.BORDE_MAPA;      // zona donde aparecen las criaturas
+            }
+            return Estilo.ARENA;               // casilla vacía
+        }
+        if (unidad == unidadSeleccionada) {
+            return Estilo.CASILLA_SELECCION;   // la que se está viendo en el registro
+        }
+        if (unidad == mapa.getNucleo()) {
+            return Estilo.CASILLA_NUCLEO;
+        }
+        if (unidad.esCriatura()) {
+            return Estilo.CASILLA_CRIATURA;
+        }
+        return Estilo.CASILLA_DEFENSA;
     }
 
     // Clic en una casilla del mapa de batalla: muestra el registro de esa unidad.
@@ -487,19 +507,28 @@ public class VentanaJuego extends javax.swing.JFrame implements ActionListener {
         if (unidadSeleccionada == null) {
             return;
         }
-        String texto = textoRegistro(unidadSeleccionada);
+        String texto = textoRegistro(unidadSeleccionada, false);
         if (!texto.equals(txtRegistro.getText())) {   // solo si cambió (para no mover la barra)
             txtRegistro.setText(texto);
         }
     }
 
-    private String textoRegistro(UnidadCombate unidad) {
+    // Información y registro de una unidad. alTerminar = true en la pantalla
+    // de resultado (ahí la vida y la posición ya son las FINALES).
+    private String textoRegistro(UnidadCombate unidad, boolean alTerminar) {
         String texto = unidad.getNombre();
         if (!unidad.estaViva()) {
             texto = texto + "  (destruida)";
         }
-        texto = texto + "\nVida: " + unidad.getVidaActual() + " / " + unidad.getVidaMaxima()
-                + "    Daño: " + unidad.getDaño() + "\n\nAtacó a:\n";
+        String palabra = "actual";
+        if (alTerminar) {
+            palabra = "final";
+        }
+        texto = texto + "\nTipo: " + unidad.getTipo()
+                + "\nVida inicial: " + unidad.getVidaMaxima() + "    Vida " + palabra + ": " + unidad.getVidaActual()
+                + "\nDaño: " + unidad.getDaño() + "    Frecuencia: " + unidad.getFrecuencia() + " ataques/s"
+                + "\nPosición " + palabra + ": " + textoPosicion(unidad.getPosicionFinal())
+                + "\n\nAtacó a:\n";
         // El hilo del mapa puede estar agregando entradas en ese mismo instante;
         // si justo choca, se deja el texto anterior y se intenta en el próximo tic.
         try {
@@ -606,6 +635,13 @@ public class VentanaJuego extends javax.swing.JFrame implements ActionListener {
         return texto;
     }
 
+    private String textoPosicion(Posicion p) {
+        if (p == null) {
+            return "(sin posición)";
+        }
+        return "fila " + p.getFila() + ", columna " + p.getColumna();
+    }
+
     private String ultimaMejora(UnidadCombate tipo) {
         ArrayList<String> historial = tipo.getHistorialMejoras();
         if (historial.size() == 0) {
@@ -618,13 +654,39 @@ public class VentanaJuego extends javax.swing.JFrame implements ActionListener {
     private String textoRegistroCompleto(Batalla batalla) {
         String texto = "=== DEFENSAS ===\n\n";
         for (Defensa defensa : batalla.getDefensas()) {
-            texto = texto + textoRegistro(defensa) + "\n";
+            texto = texto + textoRegistro(defensa, true) + "\n";
         }
         texto = texto + "=== CRIATURAS ===\n\n";
         for (Criatura criatura : batalla.getCriaturas()) {
-            texto = texto + textoRegistro(criatura) + "\n";
+            texto = texto + textoRegistro(criatura, true) + "\n";
         }
         return texto;
+    }
+
+    // =====================================================================
+    //  ESTILO (colores). Los colores están en la clase Estilo.
+    //  Se aplica una sola vez, justo después de initComponents().
+    // =====================================================================
+
+    private void aplicarEstilo() {
+        // Fondo de color para todas las pantallas
+        panelInicio.setBackground(Estilo.FONDO);
+        panelNueva.setBackground(Estilo.FONDO);
+        panelCargar.setBackground(Estilo.FONDO);
+        panelPreparacion.setBackground(Estilo.FONDO);
+        panelBatalla.setBackground(Estilo.FONDO);
+        panelResultado.setBackground(Estilo.FONDO);
+
+        // Títulos en naranja
+        lblTitulo.setForeground(Estilo.NARANJA);
+        lblTituloNueva.setForeground(Estilo.NARANJA);
+        lblTituloCargar.setForeground(Estilo.NARANJA);
+        lblTituloBatalla.setForeground(Estilo.NARANJA);
+        lblResultado.setForeground(Estilo.NARANJA);
+
+        // Texto largo del crecimiento: que baje de línea en vez de salirse
+        txtCrecimiento.setLineWrap(true);
+        txtCrecimiento.setWrapStyleWord(true);
     }
 
     // =====================================================================
@@ -642,8 +704,8 @@ public class VentanaJuego extends javax.swing.JFrame implements ActionListener {
                 return iconos.get(i);
             }
         }
-        if (!new File(ruta).exists()) {
-            return null;
+        if (!new File(ruta).isFile()) {
+            return null;   // no existe, o es una carpeta (por ejemplo "imagenes/")
         }
         Image original = new ImageIcon(ruta).getImage();
         Image pequeña = original.getScaledInstance(TAMAÑO_CASILLA - 2, TAMAÑO_CASILLA - 2, Image.SCALE_DEFAULT);
