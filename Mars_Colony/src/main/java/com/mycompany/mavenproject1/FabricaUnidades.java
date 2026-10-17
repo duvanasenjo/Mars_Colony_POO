@@ -95,6 +95,7 @@ public class FabricaUnidades {
                 || tipo.equals(ESCUPIDOR) || tipo.equals(ENJAMBRE);
     }
 
+    // Los tipos que explotan (implementan IExplosivo) son los únicos con radio.
     public boolean usaRadio(String tipo) {
         return tipo.equals(IMPACTO) || tipo.equals(DEMOLEDOR);
     }

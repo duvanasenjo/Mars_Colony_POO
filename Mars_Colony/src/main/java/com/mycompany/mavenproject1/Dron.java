@@ -1,14 +1,14 @@
 package com.mycompany.mavenproject1;
 
 /**
- * Se mueve y ataca dentro de su alcance, sin radio.
+ * Se mueve y ataca dentro de su alcance.
  *
  * @author duvan
  */
 public class Dron extends Defensa implements IAtacante, IMovibles {
 
     public Dron(String nombre, int vidaMaxima, int daño, int nivel, int costo, double frecuencia, int alcance) {
-        super(nombre, vidaMaxima, daño, nivel, costo, alcance, 0, frecuencia);
+        super(nombre, vidaMaxima, daño, nivel, costo, alcance, frecuencia);
     }
 
     // Defensa antiaérea: puede atacar voladores

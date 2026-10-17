@@ -9,6 +9,17 @@ import java.util.ArrayList;
  */
 public abstract class UnidadCombate implements Serializable {
 
+    // "Número de versión" de la clase para la serialización. Se deja FIJO
+    // para que las partidas y el catálogo guardados antes de agregar
+    // atributos nuevos se puedan seguir abriendo.
+    private static final long serialVersionUID = 8766806569075243070L;
+
+    // Estado que se dibuja en la batalla (cada uno tiene su imagen)
+    public static final String NORMAL = "normal";
+    public static final String MOVIMIENTO = "movimiento";
+    public static final String ATAQUE = "ataque";
+    public static final long DURACION_ESTADO = 600; // ms que se ve la imagen de movimiento o ataque
+
     private String nombre;
     private int vidaMaxima;
     private int vidaActual;
@@ -16,9 +27,11 @@ public abstract class UnidadCombate implements Serializable {
     private int nivel;
     private int costo;         // puntos de capacidad que cuesta
     private int alcance;       // a cuántas casillas puede atacar
-    private int radio;         // área de daño de una explosión (0 = no explota)
     private double frecuencia; // ataques por segundo (0.5 = uno cada 2 segundos)
     private Posicion posicion; // null hasta que el Mapa la coloque
+    private Posicion posicionFinal; // última casilla donde estuvo (se conserva aunque muera)
+    private String estado;          // NORMAL, MOVIMIENTO o ATAQUE
+    private long momentoEstado;     // hora (ms) en que cambió el estado
     private RegistroCombate registro; // historial de combate de esta unidad
     private int misionMinima;          // desde qué misión puede aparecer (empieza en 1)
     private ArrayList<String> historialMejoras; // registro del crecimiento por misión
@@ -28,7 +41,7 @@ public abstract class UnidadCombate implements Serializable {
     private String rutaImagenAtaque;
 
     public UnidadCombate(String nombre, int vidaMaxima, int daño, int nivel,
-                         int costo, int alcance, int radio, double frecuencia) {
+                         int costo, int alcance, double frecuencia) {
         // Validaciones: una unidad mal configurada no se puede crear
         if (nombre == null || nombre.isBlank()) {
             throw new IllegalArgumentException("El nombre no puede estar vacío");
@@ -39,9 +52,9 @@ public abstract class UnidadCombate implements Serializable {
         if (nivel < 1) {
             throw new IllegalArgumentException("El nivel debe ser 1 o mayor");
         }
-        if (daño < 0 || costo < 0 || alcance < 0 || radio < 0 || frecuencia < 0) {
+        if (daño < 0 || costo < 0 || alcance < 0 || frecuencia < 0) {
             throw new IllegalArgumentException(
-                    "Daño, costo, alcance, radio y frecuencia no pueden ser negativos");
+                    "Daño, costo, alcance y frecuencia no pueden ser negativos");
         }
         this.nombre = nombre;
         this.vidaMaxima = vidaMaxima;
@@ -50,7 +63,6 @@ public abstract class UnidadCombate implements Serializable {
         this.nivel = nivel;
         this.costo = costo;
         this.alcance = alcance;
-        this.radio = radio;
         this.frecuencia = frecuencia;
         this.registro = new RegistroCombate();
         this.misionMinima = 1;
@@ -59,6 +71,9 @@ public abstract class UnidadCombate implements Serializable {
         this.rutaImagenNormal = "";
         this.rutaImagenMovimiento = "";
         this.rutaImagenAtaque = "";
+        this.posicionFinal = null;
+        this.estado = NORMAL;
+        this.momentoEstado = 0;
     }
 
     // Pasa a una copia los datos que no van en el constructor.
@@ -225,6 +240,7 @@ public abstract class UnidadCombate implements Serializable {
             dañoReal = objetivo.getVidaActual();
         }
         objetivo.recibirDaño(dañoReal);
+        cambiarEstado(ATAQUE);   // para que la interfaz muestre la imagen de ataque
         this.registro.registrarAtaque(objetivo, dañoReal);
         objetivo.getRegistro().registrarRecibido(this, dañoReal);
     }
@@ -306,10 +322,6 @@ public abstract class UnidadCombate implements Serializable {
         return alcance;
     }
 
-    public int getRadio() {
-        return radio;
-    }
-
     public double getFrecuencia() {
         return frecuencia;
     }
@@ -318,9 +330,55 @@ public abstract class UnidadCombate implements Serializable {
         return posicion;
     }
 
-    // La usa el Mapa al colocar o mover la unidad
+    // La usa el Mapa al colocar o mover la unidad.
+    // Si es una casilla (no null), también queda anotada como posición final.
     public void setPosicion(Posicion posicion) {
         this.posicion = posicion;
+        if (posicion != null) {
+            this.posicionFinal = posicion;
+        }
+    }
+
+    // Última casilla donde estuvo; sirve para el registro aunque ya esté muerta
+    public Posicion getPosicionFinal() {
+        if (posicionFinal == null) {
+            return posicion;   // partidas guardadas antes de este cambio
+        }
+        return posicionFinal;
+    }
+
+    // ----- Estado para las imágenes (normal, movimiento, ataque) -----
+
+    // Lo llaman golpear() (ATAQUE) y el Mapa al mover (MOVIMIENTO).
+    public void cambiarEstado(String nuevoEstado) {
+        this.estado = nuevoEstado;
+        this.momentoEstado = System.currentTimeMillis();
+    }
+
+    // Estado que se debe dibujar AHORA: el de movimiento o ataque se ve
+    // solo DURACION_ESTADO milisegundos; después vuelve a NORMAL.
+    public String getEstadoActual() {
+        if (estado == null) {
+            return NORMAL;   // partidas guardadas antes de este cambio
+        }
+        long pasaron = System.currentTimeMillis() - momentoEstado;
+        if (pasaron > DURACION_ESTADO) {
+            return NORMAL;
+        }
+        return estado;
+    }
+
+    // Ruta de la imagen que corresponde al estado actual.
+    // Si esa imagen no está configurada, usa la normal.
+    public String getRutaImagenActual() {
+        String estadoActual = getEstadoActual();
+        if (estadoActual.equals(ATAQUE) && !rutaImagenAtaque.equals("")) {
+            return rutaImagenAtaque;
+        }
+        if (estadoActual.equals(MOVIMIENTO) && !rutaImagenMovimiento.equals("")) {
+            return rutaImagenMovimiento;
+        }
+        return rutaImagenNormal;
     }
 
     public RegistroCombate getRegistro() {

@@ -1,14 +1,14 @@
 package com.mycompany.mavenproject1;
 
 /**
- * Ataca por contacto: alcance 1, sin radio.
+ * Ataca por contacto: alcance 1.
  *
  * @author dylnr
  */
 public class Acechador extends Criatura {
 
     public Acechador(String nombre, int vidaMaxima, int daño, int nivel, int costo, double frecuencia) {
-        super(nombre, vidaMaxima, daño, nivel, costo, 1, 0, frecuencia);
+        super(nombre, vidaMaxima, daño, nivel, costo, 1, frecuencia);
     }
 
     @Override

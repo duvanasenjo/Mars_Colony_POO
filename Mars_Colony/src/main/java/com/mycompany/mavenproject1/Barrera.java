@@ -2,14 +2,14 @@ package com.mycompany.mavenproject1;
 
 /**
  * Bloquea el paso y absorbe daño. No ataca ni se mueve:
- * daño, alcance, radio y frecuencia quedan fijos en 0.
+ * daño, alcance y frecuencia quedan fijos en 0.
  *
  * @author duvan
  */
 public class Barrera extends Defensa {
 
     public Barrera(String nombre, int vidaMaxima, int nivel, int costo) {
-        super(nombre, vidaMaxima, 0, nivel, costo, 0, 0, 0);
+        super(nombre, vidaMaxima, 0, nivel, costo, 0, 0);
     }
 
     @Override

@@ -1,14 +1,14 @@
 package com.mycompany.mavenproject1;
 
 /**
- * Solo ataca criaturas adyacentes: alcance 1, sin radio.
+ * Solo ataca criaturas adyacentes: alcance 1.
  *
  * @author duvan
  */
 public class Contacto extends Defensa implements IAtacante {
 
     public Contacto(String nombre, int vidaMaxima, int daño, int nivel, int costo, double frecuencia) {
-        super(nombre, vidaMaxima, daño, nivel, costo, 1, 0, frecuencia);
+        super(nombre, vidaMaxima, daño, nivel, costo, 1, frecuencia);
     }
 
     @Override

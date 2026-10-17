@@ -6,9 +6,12 @@ package com.mycompany.mavenproject1;
  */
 public abstract class Criatura extends UnidadCombate implements IAtacante, IMovibles {
 
+    // Número de versión fijo para que las partidas guardadas sigan abriendo
+    private static final long serialVersionUID = -3383077171563709971L;
+
     public Criatura(String nombre, int vidaMaxima, int daño, int nivel,
-                    int costo, int alcance, int radio, double frecuencia) {
-        super(nombre, vidaMaxima, daño, nivel, costo, alcance, radio, frecuencia);
+                    int costo, int alcance, double frecuencia) {
+        super(nombre, vidaMaxima, daño, nivel, costo, alcance, frecuencia);
     }
 
     // atacar() NO se implementa aquí: cada criatura ataca a su manera.

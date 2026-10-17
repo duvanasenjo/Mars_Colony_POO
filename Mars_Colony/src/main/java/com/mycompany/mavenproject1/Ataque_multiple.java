@@ -4,7 +4,7 @@ import java.util.ArrayList;
 
 /**
  * Ataca a VARIOS objetivos distintos en cada ciclo, dentro de su alcance.
- * Sin radio.
+ *
  *
  * @author duvan
  */
@@ -14,7 +14,7 @@ public class Ataque_multiple extends Defensa implements IAtacante {
 
     public Ataque_multiple(String nombre, int vidaMaxima, int daño, int nivel, int costo, double frecuencia, int alcance,
                            int cantidadObjetivos) {
-        super(nombre, vidaMaxima, daño, nivel, costo, alcance, 0, frecuencia);
+        super(nombre, vidaMaxima, daño, nivel, costo, alcance, frecuencia);
         if (cantidadObjetivos < 1) {
             cantidadObjetivos = 1; // al menos ataca a uno
         }

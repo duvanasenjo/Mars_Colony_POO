@@ -1,14 +1,14 @@
 package com.mycompany.mavenproject1;
 
 /**
- * Ataca a distancia: alcance configurable, sin radio.
+ * Ataca a distancia: alcance configurable.
  *
  * @author dylnr
  */
 public class Escupidor extends Criatura {
 
     public Escupidor(String nombre, int vidaMaxima, int daño, int nivel, int costo, double frecuencia, int alcance) {
-        super(nombre, vidaMaxima, daño, nivel, costo, alcance, 0, frecuencia);
+        super(nombre, vidaMaxima, daño, nivel, costo, alcance, frecuencia);
     }
 
     @Override

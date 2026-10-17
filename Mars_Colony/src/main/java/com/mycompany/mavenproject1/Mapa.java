@@ -86,6 +86,7 @@ public class Mapa implements Serializable {
         celdas[vieja.getFila()][vieja.getColumna()] = null;
         celdas[nuevaFila][nuevaColumna] = unidad;
         unidad.setPosicion(new Posicion(nuevaFila, nuevaColumna));
+        unidad.cambiarEstado(UnidadCombate.MOVIMIENTO);   // la interfaz mostrará su imagen de movimiento
         return true;
     }
 

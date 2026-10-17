@@ -3,7 +3,7 @@ package com.mycompany.mavenproject1;
 /**
  * Hace VARIOS ataques seguidos en cada ciclo, dentro de su alcance.
  * Antes de cada ataque vuelve a buscar, así que si un objetivo muere
- * pasa al siguiente. Sin radio.
+ * pasa al siguiente.
  *
  * @author dylnr
  */
@@ -13,7 +13,7 @@ public class Enjambre extends Criatura {
 
     public Enjambre(String nombre, int vidaMaxima, int daño, int nivel, int costo, double frecuencia, int alcance,
                     int cantidadAtaques) {
-        super(nombre, vidaMaxima, daño, nivel, costo, alcance, 0, frecuencia);
+        super(nombre, vidaMaxima, daño, nivel, costo, alcance, frecuencia);
         if (cantidadAtaques < 1) {
             cantidadAtaques = 1; // al menos un ataque
         }

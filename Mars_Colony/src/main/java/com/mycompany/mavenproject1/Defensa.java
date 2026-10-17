@@ -6,9 +6,12 @@ package com.mycompany.mavenproject1;
  */
 public abstract class Defensa extends UnidadCombate {
 
+    // Número de versión fijo para que las partidas guardadas sigan abriendo
+    private static final long serialVersionUID = 5472240925905990628L;
+
     public Defensa(String nombre, int vidaMaxima, int daño, int nivel,
-                    int costo, int alcance, int radio, double frecuencia) {
-        super(nombre, vidaMaxima, daño, nivel, costo, alcance, radio, frecuencia);
+                    int costo, int alcance, double frecuencia) {
+        super(nombre, vidaMaxima, daño, nivel, costo, alcance, frecuencia);
     }
 
     // Por defecto una defensa NO puede atacar unidades aéreas.
