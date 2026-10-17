@@ -24,7 +24,7 @@ public class ArchivoCatalogo {
             salida.close();
             return true;
         } catch (Exception e) {
-            System.out.println("No se pudo guardar el catálogo: " + e.getMessage());
+            System.out.println("No se pudo guardar el catalogo: " + e.getMessage());
             return false;
         }
     }
@@ -37,7 +37,7 @@ public class ArchivoCatalogo {
             entrada.close();
             return catalogo;
         } catch (Exception e) {
-            System.out.println("No se pudo cargar el catálogo: " + e.getMessage());
+            System.out.println("No se pudo cargar el catalogo: " + e.getMessage());
             return null;
         }
     }

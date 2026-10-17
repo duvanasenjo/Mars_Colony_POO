@@ -31,7 +31,7 @@ public class GeneradorDatosPrueba {
 
         ArchivoCatalogo archivoCatalogo = new ArchivoCatalogo();
         if (archivoCatalogo.guardar(catalogo)) {
-            System.out.println("Catálogo guardado en " + ArchivoCatalogo.ARCHIVO);
+            System.out.println("Catalogo guardado en " + ArchivoCatalogo.ARCHIVO);
         }
         mostrarCatalogo(catalogo);
 
@@ -39,13 +39,13 @@ public class GeneradorDatosPrueba {
         ArchivoPartidas archivoPartidas = new ArchivoPartidas();
         if (archivoPartidas.guardar(partida)) {
             System.out.println("\nPartida guardada: " + partida.getNombreComandante()
-                    + " (misión " + partida.getMisionActual()
+                    + " (mision " + partida.getMisionActual()
                     + ", capacidad " + partida.getCapacidadTotal() + ")");
         }
         Batalla batalla = partida.getBatallaActual();
-        System.out.println("Perímetro: " + batalla.getDefensas().size() + " defensas, usando "
+        System.out.println("Perimetro: " + batalla.getDefensas().size() + " defensas, usando "
                 + partida.capacidadUsada(batalla) + " de " + partida.getCapacidadTotal() + " puntos");
-        System.out.println("Partidas guardadas: " + archivoPartidas.listar());
+        System.out.println("Partidas guardadas: " + sinTildes("" + archivoPartidas.listar()));
     }
 
     private Catalogo crearCatalogo() {
@@ -156,14 +156,22 @@ public class GeneradorDatosPrueba {
     private void mostrarCatalogo(Catalogo catalogo) {
         System.out.println("\nDefensas:");
         for (Defensa d : catalogo.getDefensas()) {
-            System.out.println("  " + d.getNombre() + " | vida " + d.getVidaMaxima() + ", daño " + d.getDaño()
-                    + ", costo " + d.getCosto() + ", misión " + d.getMisionMinima() + textoEstado(d));
+            System.out.println("  " + sinTildes(d.getNombre()) + " | vida " + d.getVidaMaxima() + ", dano " + d.getDaño()
+                    + ", costo " + d.getCosto() + ", mision " + d.getMisionMinima() + textoEstado(d));
         }
         System.out.println("Criaturas:");
         for (Criatura c : catalogo.getCriaturas()) {
-            System.out.println("  " + c.getNombre() + " | vida " + c.getVidaMaxima() + ", daño " + c.getDaño()
-                    + ", costo " + c.getCosto() + ", misión " + c.getMisionMinima() + textoEstado(c));
+            System.out.println("  " + sinTildes(c.getNombre()) + " | vida " + c.getVidaMaxima() + ", dano " + c.getDaño()
+                    + ", costo " + c.getCosto() + ", mision " + c.getMisionMinima() + textoEstado(c));
         }
+    }
+
+    // La consola de NetBeans no muestra bien las tildes ni la ñ (salen como "�").
+    // Solo para lo que se imprime en consola: los nombres guardados no cambian.
+    private String sinTildes(String texto) {
+        return texto.replace("á", "a").replace("é", "e").replace("í", "i").replace("ó", "o").replace("ú", "u")
+                .replace("Á", "A").replace("É", "E").replace("Í", "I").replace("Ó", "O").replace("Ú", "U")
+                .replace("ñ", "n").replace("Ñ", "N");
     }
 
     private String textoEstado(UnidadCombate unidad) {
