@@ -17,6 +17,8 @@ import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JPanel;
 import javax.swing.Timer;
+import javax.swing.BorderFactory;
+import javax.swing.border.Border;
 
 /**
  * PROGRAMA 1: la ventana del juego (JFrame Form de NetBeans).
@@ -57,6 +59,15 @@ public class VentanaJuego extends javax.swing.JFrame implements ActionListener {
     private Timer reloj;                     // refresca la pantalla durante la batalla
     private UnidadCombate unidadSeleccionada;  // la que se muestra en el registro (null = ninguna)
     private boolean yaAvanzo;                // en el resultado: true si ya se pasó a la siguiente misión
+    // Pantalla de resultado: unidades de la lista (misma posición que en cmbParticipantes, menos la opción 0)
+    private ArrayList<UnidadCombate> participantes;
+    private Batalla batallaTerminada;        // la batalla que se está revisando
+    private boolean llenandoParticipantes;   // true mientras se llena la lista (para no reaccionar)
+    // Bordes de las casillas del mapa de batalla: el color muestra la vida que le queda a la unidad
+    private Border bordeCasilla;             // borde normal (casilla vacía)
+    private Border bordeVidaAlta;
+    private Border bordeVidaMedia;
+    private Border bordeVidaBaja;
     // Íconos ya creados (misma posición en las dos listas), para no reducir la imagen cada vez
     private ArrayList<String> rutasIconos;
     private ArrayList<ImageIcon> iconos;
@@ -72,6 +83,12 @@ public class VentanaJuego extends javax.swing.JFrame implements ActionListener {
         this.plantillas = new ArrayList<Defensa>();
         this.unidadSeleccionada = null;
         this.yaAvanzo = false;
+        this.participantes = new ArrayList<UnidadCombate>();
+        this.batallaTerminada = null;
+        this.llenandoParticipantes = false;
+        this.bordeVidaAlta = BorderFactory.createLineBorder(Estilo.VERDE, 2);
+        this.bordeVidaMedia = BorderFactory.createLineBorder(Estilo.AMARILLO, 2);
+        this.bordeVidaBaja = BorderFactory.createLineBorder(Estilo.ROJO, 2);
         this.rutasIconos = new ArrayList<String>();
         this.iconos = new ArrayList<ImageIcon>();
         this.muertas = new ArrayList<UnidadCombate>();
@@ -180,6 +197,10 @@ public class VentanaJuego extends javax.swing.JFrame implements ActionListener {
         actualizarInfoDefensa();   // se eligió otra defensa en la lista
     }//GEN-LAST:event_cmbDefensasActionPerformed
 
+    private void cmbParticipantesActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmbParticipantesActionPerformed
+        mostrarParticipante();   // se eligió otra unidad en la lista del resultado
+    }//GEN-LAST:event_cmbParticipantesActionPerformed
+
     private void btnIniciarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnIniciarActionPerformed
         iniciarBatalla();
     }//GEN-LAST:event_btnIniciarActionPerformed
@@ -237,6 +258,9 @@ public class VentanaJuego extends javax.swing.JFrame implements ActionListener {
                 casilla.setMargin(new Insets(0, 0, 0, 0));   // sin espacio interno, para que quepa la imagen
                 casilla.setFont(LETRA_COORDENADA);            // para los números de fila y columna
                 casilla.setForeground(Color.DARK_GRAY);
+                if (bordeCasilla == null) {
+                    bordeCasilla = casilla.getBorder();   // se guarda el borde normal de Swing
+                }
                 // Cada casilla lleva su número: fila * 25 + columna
                 casilla.setActionCommand(prefijo + (fila * Mapa.TAMAÑO + columna));
                 casilla.addActionListener(this);   // "this" = esta ventana escucha el clic
@@ -416,7 +440,7 @@ public class VentanaJuego extends javax.swing.JFrame implements ActionListener {
         unidadSeleccionada = null;
         muertas = new ArrayList<UnidadCombate>();   // batalla nueva: sin calaveras
         txtRegistro.setText("");
-        lblUnidad.setText("Haz clic en una unidad del mapa para ver su registro.");
+        lblUnidad.setText("Clic en una unidad: su registro. Borde verde/amarillo/rojo: su vida.");
         lblTituloBatalla.setText("BATALLA - " + textoMision(partida));
         lblMensajeBatalla.setText("Llegan " + enemigos + " criaturas...");
         btnVerResultado.setEnabled(false);
@@ -492,9 +516,11 @@ public class VentanaJuego extends javax.swing.JFrame implements ActionListener {
                 casilla.setText("");
             }
             casilla.setToolTipText(textoCasilla(fila, columna));
+            casilla.setBorder(bordeCasilla);
             return;
         }
         casilla.setText("");
+        casilla.setBorder(bordeSegunVida(unidad));   // verde, amarillo o rojo según la vida
         if (unidad.recibioGolpeRecien()) {
             casilla.setBackground(Estilo.CASILLA_GOLPE);   // destello rojo: le acaban de pegar
         }
@@ -529,6 +555,18 @@ public class VentanaJuego extends javax.swing.JFrame implements ActionListener {
             }
         }
         return null;
+    }
+
+    // Borde de la casilla según la vida que le queda (igual que la barra del núcleo)
+    private Border bordeSegunVida(UnidadCombate unidad) {
+        int porcentaje = unidad.getVidaActual() * 100 / unidad.getVidaMaxima();
+        if (porcentaje >= 60) {
+            return bordeVidaAlta;
+        }
+        if (porcentaje >= 30) {
+            return bordeVidaMedia;
+        }
+        return bordeVidaBaja;
     }
 
     // Coordenadas del mapa: la primera fila muestra el número de columna y la
@@ -664,8 +702,7 @@ public class VentanaJuego extends javax.swing.JFrame implements ActionListener {
         lblResumenCriaturas.setText("Criaturas eliminadas: " + criaturasMuertas + " de " + batalla.getCriaturas().size());
         lblResumenDefensas.setText("Defensas perdidas: " + defensasPerdidas + " de " + batalla.getDefensas().size());
         lblResumenNucleo.setText("Vida final del núcleo: " + nucleo.getVidaActual() + " / " + nucleo.getVidaMaxima());
-        txtRegistroCompleto.setText(textoRegistroCompleto(batalla));
-        txtRegistroCompleto.setCaretPosition(0);   // que el texto empiece arriba
+        llenarParticipantes(batalla);   // la lista para revisar el detalle de cada unidad
 
         // ----- Título según el resultado -----
         if (!gano) {
@@ -740,6 +777,47 @@ public class VentanaJuego extends javax.swing.JFrame implements ActionListener {
             return "sin cambios";
         }
         return historial.get(historial.size() - 1);
+    }
+
+    // Llena la lista del resultado: primero "Todas", luego cada defensa y cada criatura.
+    private void llenarParticipantes(Batalla batalla) {
+        llenandoParticipantes = true;
+        batallaTerminada = batalla;
+        participantes = new ArrayList<UnidadCombate>();
+        cmbParticipantes.removeAllItems();
+        cmbParticipantes.addItem("Todas las unidades (registro completo)");
+        for (Defensa defensa : batalla.getDefensas()) {
+            participantes.add(defensa);
+            cmbParticipantes.addItem("Defensa: " + textoParticipante(defensa));
+        }
+        for (Criatura criatura : batalla.getCriaturas()) {
+            participantes.add(criatura);
+            cmbParticipantes.addItem("Criatura: " + textoParticipante(criatura));
+        }
+        llenandoParticipantes = false;
+        cmbParticipantes.setSelectedIndex(0);   // esto llama a mostrarParticipante
+        mostrarParticipante();
+    }
+
+    private String textoParticipante(UnidadCombate unidad) {
+        if (unidad.estaViva()) {
+            return unidad.getIdentificador();
+        }
+        return unidad.getIdentificador() + " (destruida)";
+    }
+
+    // Muestra el registro de la unidad elegida en la lista (o el de todas).
+    private void mostrarParticipante() {
+        int indice = cmbParticipantes.getSelectedIndex();
+        if (llenandoParticipantes || indice < 0 || batallaTerminada == null) {
+            return;
+        }
+        if (indice == 0) {
+            txtRegistroCompleto.setText(textoRegistroCompleto(batallaTerminada));
+        } else {
+            txtRegistroCompleto.setText(textoRegistro(participantes.get(indice - 1), true));
+        }
+        txtRegistroCompleto.setCaretPosition(0);   // que el texto empiece arriba
     }
 
     // Registro de TODAS las unidades de la batalla (defensas y criaturas).
@@ -885,6 +963,7 @@ public class VentanaJuego extends javax.swing.JFrame implements ActionListener {
         scrollCrecimiento = new javax.swing.JScrollPane();
         txtCrecimiento = new javax.swing.JTextArea();
         lblRegistroCompleto = new javax.swing.JLabel();
+        cmbParticipantes = new javax.swing.JComboBox<>();
         scrollRegistroCompleto = new javax.swing.JScrollPane();
         txtRegistroCompleto = new javax.swing.JTextArea();
         btnSiguiente = new javax.swing.JButton();
@@ -1206,9 +1285,17 @@ public class VentanaJuego extends javax.swing.JFrame implements ActionListener {
         panelResultado.add(scrollCrecimiento);
         scrollCrecimiento.setBounds(60, 275, 480, 300);
 
-        lblRegistroCompleto.setText("Registro completo de la batalla:");
+        lblRegistroCompleto.setText("Registro de la batalla (elige una unidad para ver su detalle):");
         panelResultado.add(lblRegistroCompleto);
         lblRegistroCompleto.setBounds(570, 85, 470, 22);
+
+        cmbParticipantes.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                cmbParticipantesActionPerformed(evt);
+            }
+        });
+        panelResultado.add(cmbParticipantes);
+        cmbParticipantes.setBounds(570, 110, 470, 28);
 
         txtRegistroCompleto.setEditable(false);
         txtRegistroCompleto.setColumns(20);
@@ -1216,7 +1303,7 @@ public class VentanaJuego extends javax.swing.JFrame implements ActionListener {
         scrollRegistroCompleto.setViewportView(txtRegistroCompleto);
 
         panelResultado.add(scrollRegistroCompleto);
-        scrollRegistroCompleto.setBounds(570, 110, 470, 465);
+        scrollRegistroCompleto.setBounds(570, 145, 470, 430);
 
         btnSiguiente.setText("Siguiente misión");
         btnSiguiente.addActionListener(new java.awt.event.ActionListener() {
@@ -1269,6 +1356,7 @@ public class VentanaJuego extends javax.swing.JFrame implements ActionListener {
     private javax.swing.JButton btnVolverCargar;
     private javax.swing.JButton btnVolverNueva;
     private javax.swing.JComboBox<String> cmbDefensas;
+    private javax.swing.JComboBox<String> cmbParticipantes;
     private javax.swing.JComboBox<String> cmbPartidas;
     private javax.swing.JLabel lblAyuda1;
     private javax.swing.JLabel lblAyuda2;
