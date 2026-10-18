@@ -6,6 +6,7 @@ import com.mycompany.mavenproject1.archivos.ArchivoPartidas;
 
 import java.awt.CardLayout;
 import java.awt.Color;
+import java.awt.Font;
 import java.awt.Image;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
@@ -44,6 +45,7 @@ public class VentanaJuego extends javax.swing.JFrame implements ActionListener {
     public static final String BATALLA = "BATALLA ";   // casillas del mapa de batalla
     public static final String TIC = "TIC";            // cada "tic" del reloj de la batalla
     public static final int REFRESCO = 200;            // milisegundos entre refrescos de pantalla
+    public static final Font LETRA_COORDENADA = new Font("SansSerif", Font.PLAIN, 9);
 
     // ---------- Datos ----------
     private Partida partida;
@@ -54,6 +56,7 @@ public class VentanaJuego extends javax.swing.JFrame implements ActionListener {
     private ArrayList<Defensa> plantillas;   // misma posición que en cmbDefensas
     private Timer reloj;                     // refresca la pantalla durante la batalla
     private UnidadCombate unidadSeleccionada;  // la que se muestra en el registro (null = ninguna)
+    private boolean yaAvanzo;                // en el resultado: true si ya se pasó a la siguiente misión
     // Íconos ya creados (misma posición en las dos listas), para no reducir la imagen cada vez
     private ArrayList<String> rutasIconos;
     private ArrayList<ImageIcon> iconos;
@@ -68,6 +71,7 @@ public class VentanaJuego extends javax.swing.JFrame implements ActionListener {
         this.archivoCatalogo = new ArchivoCatalogo();
         this.plantillas = new ArrayList<Defensa>();
         this.unidadSeleccionada = null;
+        this.yaAvanzo = false;
         this.rutasIconos = new ArrayList<String>();
         this.iconos = new ArrayList<ImageIcon>();
         this.muertas = new ArrayList<UnidadCombate>();
@@ -198,7 +202,11 @@ public class VentanaJuego extends javax.swing.JFrame implements ActionListener {
     }//GEN-LAST:event_btnVerResultadoActionPerformed
 
     private void btnSiguienteActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnSiguienteActionPerformed
-        mostrarPreparacion();   // el perímetro ya se reconstruyó en mostrarResultado
+        if (yaAvanzo) {
+            mostrarPreparacion();   // segundo clic: ir a preparar la misión nueva
+        } else {
+            avanzarMision();        // primer clic: crecen las unidades y se muestra cuánto
+        }
     }//GEN-LAST:event_btnSiguienteActionPerformed
 
     private void btnRepetirActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnRepetirActionPerformed
@@ -227,6 +235,8 @@ public class VentanaJuego extends javax.swing.JFrame implements ActionListener {
             for (int columna = 0; columna < Mapa.TAMAÑO; columna++) {
                 JButton casilla = new JButton();
                 casilla.setMargin(new Insets(0, 0, 0, 0));   // sin espacio interno, para que quepa la imagen
+                casilla.setFont(LETRA_COORDENADA);            // para los números de fila y columna
+                casilla.setForeground(Color.DARK_GRAY);
                 // Cada casilla lleva su número: fila * 25 + columna
                 casilla.setActionCommand(prefijo + (fila * Mapa.TAMAÑO + columna));
                 casilla.addActionListener(this);   // "this" = esta ventana escucha el clic
@@ -327,7 +337,7 @@ public class VentanaJuego extends javax.swing.JFrame implements ActionListener {
             for (Defensa defensa : batalla.getDefensas()) {
                 if (defensa == unidad) {
                     batalla.quitarDefensa(defensa);
-                    lblMensajePreparacion.setText("Quitaste " + defensa.getNombre() + ".");
+                    lblMensajePreparacion.setText("Quitaste " + defensa.getIdentificador() + ".");
                 }
             }
         } else if (mapa.esBorde(fila, columna)) {
@@ -365,17 +375,25 @@ public class VentanaJuego extends javax.swing.JFrame implements ActionListener {
                 UnidadCombate unidad = mapa.obtener(fila, columna);
                 if (unidad == null) {
                     casilla.setIcon(null);
-                    casilla.setToolTipText(null);
+                    casilla.setText(textoCoordenada(fila, columna));
+                    casilla.setToolTipText(textoCasilla(fila, columna));
                 } else {
                     casilla.setIcon(icono(unidad.getRutaImagenNormal()));
-                    casilla.setToolTipText(unidad.getNombre());   // nombre al dejar el mouse encima
+                    casilla.setText("");
+                    // nombre y casilla al dejar el mouse encima
+                    casilla.setToolTipText(unidad.getIdentificador() + " " + textoCasilla(fila, columna));
                 }
                 casilla.setBackground(colorCasilla(mapa, unidad, fila, columna));
             }
         }
-        barraCapacidad.setMaximum(partida.getCapacidadTotal());
-        barraCapacidad.setValue(partida.capacidadUsada(batalla));
-        barraCapacidad.setString(partida.capacidadUsada(batalla) + " / " + partida.getCapacidadTotal());
+        // Capacidad total, usada y restante (lo pide el enunciado)
+        int total = partida.getCapacidadTotal();
+        int usada = partida.capacidadUsada(batalla);
+        lblCapacidad.setText("Capacidad: total " + total + "  -  usada " + usada
+                + "  -  restante " + partida.capacidadRestante(batalla));
+        barraCapacidad.setMaximum(total);
+        barraCapacidad.setValue(usada);
+        barraCapacidad.setString(usada + " / " + total);
     }
 
     // =====================================================================
@@ -431,7 +449,7 @@ public class VentanaJuego extends javax.swing.JFrame implements ActionListener {
         } else {
             barraNucleo.setForeground(Estilo.ROJO);
         }
-        lblTiempo.setText("Tiempo: " + batalla.getSegundos() + " s  (límite " + Batalla.LIMITE_SEGUNDOS + " s)");
+        lblTiempo.setText("Tiempo: " + batalla.getSegundos() + " s");
 
         int criaturasVivas = 0;
         for (Criatura criatura : batalla.getCriaturas()) {
@@ -466,10 +484,17 @@ public class VentanaJuego extends javax.swing.JFrame implements ActionListener {
         if (unidad == null) {
             // Si alguien murió aquí, queda la calavera hasta que termine la batalla.
             // (Si otra unidad se para encima, se ve la unidad: este if solo es para casillas vacías.)
-            casilla.setIcon(icono(muerteEn(fila, columna)));
-            casilla.setToolTipText(null);
+            String muerte = muerteEn(fila, columna);
+            casilla.setIcon(icono(muerte));
+            if (muerte == null) {
+                casilla.setText(textoCoordenada(fila, columna));
+            } else {
+                casilla.setText("");
+            }
+            casilla.setToolTipText(textoCasilla(fila, columna));
             return;
         }
+        casilla.setText("");
         if (unidad.recibioGolpeRecien()) {
             casilla.setBackground(Estilo.CASILLA_GOLPE);   // destello rojo: le acaban de pegar
         }
@@ -479,7 +504,8 @@ public class VentanaJuego extends javax.swing.JFrame implements ActionListener {
             imagen = icono(unidad.getRutaImagenNormal());   // esa imagen no existe: se usa la normal
         }
         casilla.setIcon(imagen);
-        casilla.setToolTipText(unidad.getNombre() + " - vida " + unidad.getVidaActual() + "/" + unidad.getVidaMaxima());
+        casilla.setToolTipText(unidad.getIdentificador() + " " + textoCasilla(fila, columna)
+                + " - vida " + unidad.getVidaActual() + "/" + unidad.getVidaMaxima());
     }
 
     // Anota las unidades que acaban de morir, para dejar su calavera.
@@ -503,6 +529,23 @@ public class VentanaJuego extends javax.swing.JFrame implements ActionListener {
             }
         }
         return null;
+    }
+
+    // Coordenadas del mapa: la primera fila muestra el número de columna y la
+    // primera columna el número de fila (solo si la casilla está vacía).
+    private String textoCoordenada(int fila, int columna) {
+        if (fila == 0) {
+            return "" + columna;
+        }
+        if (columna == 0) {
+            return "" + fila;
+        }
+        return "";
+    }
+
+    // "(fila 5, columna 12)": se muestra al dejar el mouse sobre cualquier casilla
+    private String textoCasilla(int fila, int columna) {
+        return "(fila " + fila + ", columna " + columna + ")";
     }
 
     // Color de fondo de una casilla (lo usan los dos mapas).
@@ -531,7 +574,7 @@ public class VentanaJuego extends javax.swing.JFrame implements ActionListener {
         UnidadCombate unidad = partida.getBatallaActual().getMapa().obtener(fila, columna);
         if (unidad != null) {
             unidadSeleccionada = unidad;
-            lblUnidad.setText("Registro de " + unidad.getNombre() + ":");
+            lblUnidad.setText("Registro de " + unidad.getIdentificador() + ":");
             actualizarRegistro();
         }
     }
@@ -550,7 +593,7 @@ public class VentanaJuego extends javax.swing.JFrame implements ActionListener {
     // Información y registro de una unidad. alTerminar = true en la pantalla
     // de resultado (ahí la vida y la posición ya son las FINALES).
     private String textoRegistro(UnidadCombate unidad, boolean alTerminar) {
-        String texto = unidad.getNombre();
+        String texto = unidad.getIdentificador();
         if (!unidad.estaViva()) {
             texto = texto + "  (destruida)";
         }
@@ -592,10 +635,10 @@ public class VentanaJuego extends javax.swing.JFrame implements ActionListener {
     // =====================================================================
 
     // Botón "Ver resultado". Muestra el resumen de la batalla y deja la
-    // partida lista para lo que sigue:
-    //  - si ganó: supera la misión (+capacidad y crecimiento al azar)
-    //  - en los dos casos: reconstruye el perímetro y guarda
-    // Así "Siguiente misión" y "Repetir misión" solo vuelven a la preparación.
+    // partida lista para REPETIR (perímetro reconstruido y guardado).
+    // Sin importar si ganó o perdió, el jugador puede elegir:
+    //  - "Repetir misión": vuelve a la preparación de la misma misión.
+    //  - "Siguiente misión": avanzarMision() (+capacidad y crecimiento).
     public void mostrarResultado() {
         btnVerResultado.setEnabled(false);   // para que no se pueda hacer dos veces
         Batalla batalla = partida.getBatallaActual();
@@ -617,42 +660,57 @@ public class VentanaJuego extends javax.swing.JFrame implements ActionListener {
         }
         Nucleo nucleo = batalla.getMapa().getNucleo();
         lblResumenMision.setText("Misión jugada: " + misionJugada);
-        String duracion = "Duración: " + batalla.getSegundos() + " segundos";
-        if (batalla.isTiempoAgotado()) {
-            duracion = duracion + " (se acabó el tiempo y el núcleo resistió)";
-        }
-        lblResumenTiempo.setText(duracion);
+        lblResumenTiempo.setText("Duración: " + batalla.getSegundos() + " segundos");
         lblResumenCriaturas.setText("Criaturas eliminadas: " + criaturasMuertas + " de " + batalla.getCriaturas().size());
         lblResumenDefensas.setText("Defensas perdidas: " + defensasPerdidas + " de " + batalla.getDefensas().size());
         lblResumenNucleo.setText("Vida final del núcleo: " + nucleo.getVidaActual() + " / " + nucleo.getVidaMaxima());
         txtRegistroCompleto.setText(textoRegistroCompleto(batalla));
         txtRegistroCompleto.setCaretPosition(0);   // que el texto empiece arriba
 
-        // ----- Lo que sigue según el resultado -----
-        if (gano) {
-            partida.superarMision();   // +5 de capacidad y crecimiento de 5 % a 20 %
-            if (misionJugada == Partida.MISIONES_INICIALES) {
-                lblResultado.setText("¡Completaste las " + Partida.MISIONES_INICIALES + " misiones!");
-                btnSiguiente.setText("Continuar con misión extra");
-            } else {
-                lblResultado.setText("¡Misión superada!");
-                btnSiguiente.setText("Siguiente misión");
-            }
-            lblResumenCapacidad.setText("Capacidad: ahora tienes " + partida.getCapacidadTotal()
-                    + " puntos (+" + Partida.CAPACIDAD_POR_MISION + ")");
-            txtCrecimiento.setText(textoCrecimiento(partida.getMisionActual()));
-        } else {
+        // ----- Título según el resultado -----
+        if (!gano) {
             lblResultado.setText("El núcleo fue destruido");
-            lblResumenCapacidad.setText("Capacidad: sigue en " + partida.getCapacidadTotal() + " puntos");
-            txtCrecimiento.setText("No hubo crecimiento: la misión se repite con las mismas unidades.");
+        } else if (misionJugada == Partida.MISIONES_INICIALES) {
+            lblResultado.setText("¡Completaste las " + Partida.MISIONES_INICIALES + " misiones!");
+        } else {
+            lblResultado.setText("¡Misión superada!");
         }
-        txtCrecimiento.setCaretPosition(0);
-        btnSiguiente.setVisible(gano);
-        btnRepetir.setVisible(!gano);
 
-        partida.reconstruirPerimetro();   // mismo perímetro, unidades nuevas con vida llena
+        // ----- Las dos opciones siempre (el enunciado lo pide para facilitar la revisión) -----
+        yaAvanzo = false;
+        if (misionJugada >= Partida.MISIONES_INICIALES) {
+            btnSiguiente.setText("Continuar con misión extra");
+        } else {
+            btnSiguiente.setText("Siguiente misión");
+        }
+        btnSiguiente.setVisible(true);
+        btnRepetir.setVisible(true);
+        lblResumenCapacidad.setText("Capacidad: " + partida.getCapacidadTotal() + " puntos (si avanzas: +"
+                + Partida.CAPACIDAD_POR_MISION + ")");
+        txtCrecimiento.setText("Repetir misión: misma misión y mismo perímetro, con vida llena.\n\n"
+                + "Siguiente misión: la capacidad sube " + Partida.CAPACIDAD_POR_MISION
+                + " puntos y cada defensa y criatura crece entre 5 % y 20 % en vida y daño.\n"
+                + "Aquí se mostrará cuánto creció cada una.");
+        txtCrecimiento.setCaretPosition(0);
+
+        partida.reconstruirPerimetro();   // listo para repetir: unidades nuevas con vida llena
         archivoPartidas.guardar(partida);
         mostrarPantalla("resultado");
+    }
+
+    // Primer clic en "Siguiente misión": pasa a la misión siguiente, muestra
+    // el crecimiento y deja el botón listo para ir a la preparación.
+    private void avanzarMision() {
+        partida.superarMision();          // +5 de capacidad y crecimiento de 5 % a 20 %
+        partida.reconstruirPerimetro();   // el perímetro con las unidades ya mejoradas
+        archivoPartidas.guardar(partida);
+        lblResumenCapacidad.setText("Capacidad: ahora tienes " + partida.getCapacidadTotal()
+                + " puntos (+" + Partida.CAPACIDAD_POR_MISION + ")");
+        txtCrecimiento.setText(textoCrecimiento(partida.getMisionActual()));
+        txtCrecimiento.setCaretPosition(0);
+        btnSiguiente.setText("Preparar misión " + partida.getMisionActual());
+        btnRepetir.setVisible(false);     // ya avanzó: no se puede repetir la anterior
+        yaAvanzo = true;
     }
 
     // Una línea por plantilla con lo que creció al pasar a la misión nueva

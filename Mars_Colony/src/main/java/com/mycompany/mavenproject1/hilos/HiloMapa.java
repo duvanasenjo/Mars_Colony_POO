@@ -11,8 +11,8 @@ import com.mycompany.mavenproject1.UnidadCombate;
  * del mapa a los muertos. Como solo este hilo toca el mapa, nunca
  * quedan dos unidades en la misma casilla ni dos ataques se pisan.
  *
- * También revisa si la batalla terminó (núcleo destruido, todas las
- * criaturas muertas o tiempo agotado).
+ * También revisa si la batalla terminó (núcleo destruido o todas las
+ * criaturas muertas).
  *
  * @author dylnr
  */

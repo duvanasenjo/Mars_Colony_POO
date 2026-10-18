@@ -20,6 +20,7 @@ public abstract class UnidadCombate implements Serializable {
     public static final String ATAQUE = "ataque";
     public static final long DURACION_ESTADO = 1000; // ms que se ve la imagen de movimiento o ataque
 
+    private int id;            // número único dentro de la batalla (0 = todavía sin número)
     private String nombre;
     private int vidaMaxima;
     private int vidaActual;
@@ -305,6 +306,23 @@ public abstract class UnidadCombate implements Serializable {
 
     public String getNombre() {
         return nombre;
+    }
+
+    public int getId() {
+        return id;
+    }
+
+    // La usa Batalla al colocar la unidad: le da el siguiente número libre
+    public void setId(int id) {
+        this.id = id;
+    }
+
+    // Nombre + número, para distinguir unidades iguales: "Torre láser #3"
+    public String getIdentificador() {
+        if (id <= 0) {
+            return nombre;   // núcleo o plantillas del catálogo: no llevan número
+        }
+        return nombre + " #" + id;
     }
 
     public int getVidaMaxima() {

@@ -19,31 +19,33 @@ import java.util.ArrayList;
  */
 public class Batalla implements Serializable {
 
+    // Número de versión fijo para que las partidas guardadas sigan abriendo
+    private static final long serialVersionUID = -3056286848464363793L;
+
     public static final long PAUSA_BASE = 2000;      // ms entre turnos con frecuencia 1.0
-    public static final int LIMITE_SEGUNDOS = 180;  // 3 minutos (decisión de diseño)
 
     private Mapa mapa;
     private ArrayList<Defensa> defensas;   // colección polimórfica
     private ArrayList<Criatura> criaturas; // colección polimórfica
     private int ciclosJugados;
+    private int ultimoId;            // último número de identificador que se dio
 
     // ----- Para la batalla con hilos -----
     private ColaTurnos colaTurnos;   // fila de unidades que pidieron turno
     private boolean enCurso;         // true mientras los hilos deben seguir
     private long inicio;             // hora en que empezó (milisegundos)
     private long fin;                // hora en que terminó (0 si sigue)
-    private boolean tiempoAgotado;   // true si terminó por el límite de tiempo
 
     public Batalla(Mapa mapa) {
         this.mapa = mapa;
         this.defensas = new ArrayList<>();
         this.criaturas = new ArrayList<>();
         this.ciclosJugados = 0;
+        this.ultimoId = 0;
         this.colaTurnos = new ColaTurnos();
         this.enCurso = false;
         this.inicio = 0;
         this.fin = 0;
-        this.tiempoAgotado = false;
     }
 
     // ----- Batalla con hilos -----
@@ -56,7 +58,6 @@ public class Batalla implements Serializable {
         }
         colaTurnos = new ColaTurnos();
         enCurso = true;
-        tiempoAgotado = false;
         // System.currentTimeMillis(): la hora actual en milisegundos
         inicio = System.currentTimeMillis();
         fin = 0;
@@ -83,11 +84,9 @@ public class Batalla implements Serializable {
     }
 
     // La llama el HiloMapa después de cada turno.
+    // Termina SOLO si el núcleo murió o no queda ninguna criatura viva (como dice el enunciado).
     public void revisarFin() {
         if (haTerminado()) {
-            terminar();
-        } else if (getSegundos() >= LIMITE_SEGUNDOS) {
-            tiempoAgotado = true;
             terminar();
         }
     }
@@ -116,9 +115,16 @@ public class Batalla implements Serializable {
     public boolean agregarDefensa(Defensa defensa, int fila, int columna) {
         if (mapa.colocar(defensa, fila, columna)) {
             defensas.add(defensa);
+            darId(defensa);
             return true;
         }
         return false;
+    }
+
+    // Cada unidad que entra a la batalla recibe un número distinto (1, 2, 3...)
+    private void darId(UnidadCombate unidad) {
+        ultimoId = ultimoId + 1;
+        unidad.setId(ultimoId);
     }
 
     // Quita una defensa durante la preparación (el jugador se arrepintió).
@@ -146,6 +152,7 @@ public class Batalla implements Serializable {
         Posicion elegida = libres.get(indice);
         if (mapa.colocar(criatura, elegida.getFila(), elegida.getColumna())) {
             criaturas.add(criatura);
+            darId(criatura);
             return true;
         }
         return false;
@@ -211,10 +218,10 @@ public class Batalla implements Serializable {
         return true;
     }
 
-    // Ganan las defensas si el núcleo sigue vivo y, o murieron todas las
-    // criaturas, o se acabó el tiempo límite.
+    // Ganan las defensas si la batalla terminó y el núcleo sigue vivo
+    // (o sea, murieron todas las criaturas).
     public boolean ganaronLasDefensas() {
-        return mapa.getNucleo().estaViva() && (haTerminado() || tiempoAgotado);
+        return mapa.getNucleo().estaViva() && haTerminado();
     }
 
     // Juega ciclos hasta que la batalla termine.
@@ -239,10 +246,6 @@ public class Batalla implements Serializable {
 
     public boolean isEnCurso() {
         return enCurso;
-    }
-
-    public boolean isTiempoAgotado() {
-        return tiempoAgotado;
     }
 
     // Se devuelven copias para que nadie de afuera cambie las listas reales
