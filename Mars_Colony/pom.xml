@@ -7,8 +7,8 @@
     <packaging>jar</packaging>
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <maven.compiler.release>26</maven.compiler.release>
-        <exec.mainClass>com.mycompany.mavenproject1.Mavenproject1</exec.mainClass>
+        <maven.compiler.release>21</maven.compiler.release>
+        <exec.mainClass>com.mycompany.mavenproject1.Mars_Colony</exec.mainClass>
     </properties>
     <name>Mars_Colony</name>
 </project>
