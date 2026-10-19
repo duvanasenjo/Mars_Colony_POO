@@ -31,8 +31,8 @@ import javax.swing.JTextField;
 public class VentanaAdmin extends javax.swing.JFrame {
 
     // Acceso del administrador (decisión de diseño: constantes)
-    public static final String USUARIO = "admin";
-    public static final String CONTRASEÑA = "marte2187";
+    public static final String USUARIO = "DD";
+    public static final String CONTRASEÑA = "DD";
 
     private ArchivoCatalogo archivoCatalogo;
     private Catalogo catalogo;
