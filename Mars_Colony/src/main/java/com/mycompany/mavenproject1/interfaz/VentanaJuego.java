@@ -934,6 +934,7 @@ public class VentanaJuego extends javax.swing.JFrame implements ActionListener {
         btnCargar = new javax.swing.JButton();
         btnSalir = new javax.swing.JButton();
         lblMensajeInicio = new javax.swing.JLabel();
+        lblSubtitulo1 = new javax.swing.JLabel();
         panelNueva = new javax.swing.JPanel();
         lblTituloNueva = new javax.swing.JLabel();
         lblNombre = new javax.swing.JLabel();
@@ -976,6 +977,7 @@ public class VentanaJuego extends javax.swing.JFrame implements ActionListener {
         scrollRegistro = new javax.swing.JScrollPane();
         txtRegistro = new javax.swing.JTextArea();
         btnVerResultado = new javax.swing.JButton();
+        btnRendirse = new javax.swing.JButton();
         lblMensajeBatalla = new javax.swing.JLabel();
         panelResultado = new javax.swing.JPanel();
         lblResultado = new javax.swing.JLabel();
@@ -993,7 +995,6 @@ public class VentanaJuego extends javax.swing.JFrame implements ActionListener {
         scrollRegistroCompleto = new javax.swing.JScrollPane();
         txtRegistroCompleto = new javax.swing.JTextArea();
         btnSiguiente = new javax.swing.JButton();
-        btnRendirse = new javax.swing.JButton();
         btnRepetir = new javax.swing.JButton();
         btnTerminar = new javax.swing.JButton();
 
@@ -1040,9 +1041,12 @@ public class VentanaJuego extends javax.swing.JFrame implements ActionListener {
         });
         panelInicio.add(btnSalir);
         btnSalir.setBounds(60, 270, 220, 40);
-
         panelInicio.add(lblMensajeInicio);
         lblMensajeInicio.setBounds(60, 330, 600, 22);
+
+        lblSubtitulo1.setText("Duvan y Dylan");
+        panelInicio.add(lblSubtitulo1);
+        lblSubtitulo1.setBounds(62, 110, 400, 60);
 
         getContentPane().add(panelInicio, "inicio");
 
@@ -1083,7 +1087,6 @@ public class VentanaJuego extends javax.swing.JFrame implements ActionListener {
         });
         panelNueva.add(btnVolverNueva);
         btnVolverNueva.setBounds(220, 165, 140, 35);
-
         panelNueva.add(lblMensajeNueva);
         lblMensajeNueva.setBounds(60, 220, 700, 22);
 
@@ -1100,7 +1103,6 @@ public class VentanaJuego extends javax.swing.JFrame implements ActionListener {
         lblPartidas.setText("Partidas guardadas:");
         panelCargar.add(lblPartidas);
         lblPartidas.setBounds(60, 90, 300, 22);
-
         panelCargar.add(cmbPartidas);
         cmbPartidas.setBounds(60, 115, 300, 30);
 
@@ -1121,7 +1123,6 @@ public class VentanaJuego extends javax.swing.JFrame implements ActionListener {
         });
         panelCargar.add(btnVolverCargar);
         btnVolverCargar.setBounds(220, 165, 140, 35);
-
         panelCargar.add(lblMensajeCargar);
         lblMensajeCargar.setBounds(60, 220, 700, 22);
 
@@ -1161,7 +1162,6 @@ public class VentanaJuego extends javax.swing.JFrame implements ActionListener {
         });
         panelPreparacion.add(cmbDefensas);
         cmbDefensas.setBounds(690, 175, 380, 30);
-
         panelPreparacion.add(lblInfoDefensa);
         lblInfoDefensa.setBounds(690, 210, 380, 22);
 
@@ -1203,7 +1203,6 @@ public class VentanaJuego extends javax.swing.JFrame implements ActionListener {
         });
         panelPreparacion.add(btnSalirPreparacion);
         btnSalirPreparacion.setBounds(690, 385, 380, 35);
-
         panelPreparacion.add(lblMensajePreparacion);
         lblMensajePreparacion.setBounds(690, 440, 400, 22);
 
@@ -1272,7 +1271,6 @@ public class VentanaJuego extends javax.swing.JFrame implements ActionListener {
         });
         panelBatalla.add(btnRendirse);
         btnRendirse.setBounds(690, 570, 185, 35);
-
         panelBatalla.add(lblMensajeBatalla);
         lblMensajeBatalla.setBounds(690, 615, 400, 22);
 
@@ -1384,10 +1382,10 @@ public class VentanaJuego extends javax.swing.JFrame implements ActionListener {
     private javax.swing.JButton btnGuardar;
     private javax.swing.JButton btnIniciar;
     private javax.swing.JButton btnNueva;
+    private javax.swing.JButton btnRendirse;
     private javax.swing.JButton btnRepetir;
     private javax.swing.JButton btnSalir;
     private javax.swing.JButton btnSalirPreparacion;
-    private javax.swing.JButton btnRendirse;
     private javax.swing.JButton btnSiguiente;
     private javax.swing.JButton btnTerminar;
     private javax.swing.JButton btnVerResultado;
@@ -1424,6 +1422,7 @@ public class VentanaJuego extends javax.swing.JFrame implements ActionListener {
     private javax.swing.JLabel lblResumenNucleo;
     private javax.swing.JLabel lblResumenTiempo;
     private javax.swing.JLabel lblSubtitulo;
+    private javax.swing.JLabel lblSubtitulo1;
     private javax.swing.JLabel lblTiempo;
     private javax.swing.JLabel lblTitulo;
     private javax.swing.JLabel lblTituloBatalla;
