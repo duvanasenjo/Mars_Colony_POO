@@ -59,6 +59,7 @@ public class VentanaJuego extends javax.swing.JFrame implements ActionListener {
     private Timer reloj;                     // refresca la pantalla durante la batalla
     private UnidadCombate unidadSeleccionada;  // la que se muestra en el registro (null = ninguna)
     private boolean yaAvanzo;                // en el resultado: true si ya se pasó a la siguiente misión
+    private boolean seRindio;                // true si el jugador apretó "Rendirse" en esta batalla
     // Pantalla de resultado: unidades de la lista (misma posición que en cmbParticipantes, menos la opción 0)
     private ArrayList<UnidadCombate> participantes;
     private Batalla batallaTerminada;        // la batalla que se está revisando
@@ -221,6 +222,10 @@ public class VentanaJuego extends javax.swing.JFrame implements ActionListener {
     private void btnVerResultadoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnVerResultadoActionPerformed
         mostrarResultado();
     }//GEN-LAST:event_btnVerResultadoActionPerformed
+
+    private void btnRendirseActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnRendirseActionPerformed
+        rendirse();
+    }//GEN-LAST:event_btnRendirseActionPerformed
 
     private void btnSiguienteActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnSiguienteActionPerformed
         if (yaAvanzo) {
@@ -444,6 +449,8 @@ public class VentanaJuego extends javax.swing.JFrame implements ActionListener {
         lblTituloBatalla.setText("BATALLA - " + textoMision(partida));
         lblMensajeBatalla.setText("Llegan " + enemigos + " criaturas...");
         btnVerResultado.setEnabled(false);
+        seRindio = false;
+        btnRendirse.setEnabled(true);
         refrescarBatalla();
         mostrarPantalla("batalla");
         batalla.iniciar();   // arranca un hilo por unidad + el hilo del mapa
@@ -499,7 +506,24 @@ public class VentanaJuego extends javax.swing.JFrame implements ActionListener {
                 lblMensajeBatalla.setText("El núcleo fue destruido.");
             }
             btnVerResultado.setEnabled(true);
+            btnRendirse.setEnabled(false);
         }
+    }
+
+    // Botón "Rendirse": por si la batalla se traba o el jugador ya no quiere seguir.
+    // Apaga la batalla (los hilos ven que ya no está en curso y se detienen),
+    // para el reloj de la pantalla y pasa directo a los resultados.
+    // Cuenta como misión perdida, pero igual se puede repetir o avanzar.
+    private void rendirse() {
+        Batalla batalla = partida.getBatallaActual();
+        if (!batalla.isEnCurso()) {
+            return;   // ya terminó sola: no hay nada que detener
+        }
+        seRindio = true;
+        batalla.detener();
+        reloj.stop();
+        btnRendirse.setEnabled(false);
+        mostrarResultado();
     }
 
     private void pintarCasillaBatalla(JButton casilla, Mapa mapa, int fila, int columna) {
@@ -705,7 +729,9 @@ public class VentanaJuego extends javax.swing.JFrame implements ActionListener {
         llenarParticipantes(batalla);   // la lista para revisar el detalle de cada unidad
 
         // ----- Título según el resultado -----
-        if (!gano) {
+        if (seRindio) {
+            lblResultado.setText("Te rendiste: misión perdida");
+        } else if (!gano) {
             lblResultado.setText("El núcleo fue destruido");
         } else if (misionJugada == Partida.MISIONES_INICIALES) {
             lblResultado.setText("¡Completaste las " + Partida.MISIONES_INICIALES + " misiones!");
@@ -967,6 +993,7 @@ public class VentanaJuego extends javax.swing.JFrame implements ActionListener {
         scrollRegistroCompleto = new javax.swing.JScrollPane();
         txtRegistroCompleto = new javax.swing.JTextArea();
         btnSiguiente = new javax.swing.JButton();
+        btnRendirse = new javax.swing.JButton();
         btnRepetir = new javax.swing.JButton();
         btnTerminar = new javax.swing.JButton();
 
@@ -1234,7 +1261,17 @@ public class VentanaJuego extends javax.swing.JFrame implements ActionListener {
             }
         });
         panelBatalla.add(btnVerResultado);
-        btnVerResultado.setBounds(690, 570, 380, 35);
+        btnVerResultado.setBounds(885, 570, 185, 35);
+
+        btnRendirse.setText("Rendirse");
+        btnRendirse.setEnabled(false);
+        btnRendirse.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnRendirseActionPerformed(evt);
+            }
+        });
+        panelBatalla.add(btnRendirse);
+        btnRendirse.setBounds(690, 570, 185, 35);
 
         panelBatalla.add(lblMensajeBatalla);
         lblMensajeBatalla.setBounds(690, 615, 400, 22);
@@ -1350,6 +1387,7 @@ public class VentanaJuego extends javax.swing.JFrame implements ActionListener {
     private javax.swing.JButton btnRepetir;
     private javax.swing.JButton btnSalir;
     private javax.swing.JButton btnSalirPreparacion;
+    private javax.swing.JButton btnRendirse;
     private javax.swing.JButton btnSiguiente;
     private javax.swing.JButton btnTerminar;
     private javax.swing.JButton btnVerResultado;
